@@ -1,5 +1,3 @@
-const fetch = require('node-fetch')
-
 const {
   createParams,
   fetchHtml,
@@ -12,10 +10,9 @@ const {
 } = require('./utils')
 
 exports.handler = async (event, context) => {
-
   console.log('=== request accepted ===')
 
-  if (event.httpMethod !== 'POST'){
+  if (event.httpMethod !== 'POST') {
     console.log('ERR: method is not post')
     return {
       statusCode: 400,
@@ -24,11 +21,11 @@ exports.handler = async (event, context) => {
   }
 
   const bodyFormat = event.headers['x-bodyformat'] || 'TEXT'
-  const converter = bodyFormat === 'JSON' ? createDataFromJSON : createDataFromBodyText;
+  const converter = bodyFormat === 'JSON' ? createDataFromJSON : createDataFromBodyText
   const { tweetText, urlSource, appSecret } = converter(event.body)
 
   // check params
-  if(!urlSource || !appSecret) {
+  if (!urlSource || !appSecret) {
     console.log('ERR: params not enough')
     return {
       statusCode: 400,
@@ -37,7 +34,7 @@ exports.handler = async (event, context) => {
   }
 
   // need valid appSecret
-  if(!isValidSecret(appSecret)) {
+  if (!isValidSecret(appSecret)) {
     console.log('ERR: invalid appSecret')
     return {
       statusCode: 400,
@@ -45,13 +42,12 @@ exports.handler = async (event, context) => {
     }
   }
 
-  let formattedPageText;
+  let formattedPageText
 
   try {
     // fetch target page's html as text
     const html = await fetchHtml(urlSource)
     formattedPageText = createFormattedTextFromHtml(html)
-
   } catch (err) {
     console.log('ERR: fetching page failed')
     console.log(err)
@@ -77,19 +73,21 @@ exports.handler = async (event, context) => {
       console.log('ERR: trello api says response.ok is false')
       // NOT res.status >= 200 && res.status < 300
       const data = await response.json()
+      console.log(data)
       return {
         statusCode: response.status,
         body: response.statusText
       }
     }
 
-    const data = await response.json()
+    // const data = await response.json()
 
     console.log('DONE: succeeded')
     // succeeded!
     return {
       statusCode: 200,
-      body: '' //JSON.stringify(data)
+      body: ''
+      // body: JSON.stringify(data)
     }
   } catch (err) {
     // something wrong
@@ -100,5 +98,4 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({ msg: err.message }) // Could be a custom message or object i.e. JSON.stringify(err)
     }
   }
-
 }

@@ -1,5 +1,5 @@
 require('dotenv').config()
-const { URLSearchParams } = require('url');
+const { URLSearchParams } = require('url')
 const fetch = require('node-fetch')
 const parseHtml = require('node-html-parser').parse
 const frontMatter = require('front-matter')
@@ -7,13 +7,13 @@ const frontMatter = require('front-matter')
 const {
   TRELLO_API_KEY: key,
   TRELLO_API_TOKEN: token,
-  TRELLO_LIST_ID_NEW_CARD_TO_BE_APPENDED: list_id_tweet,
-  TRELLO_LIST_ID_IOS: list_id_ios,
+  TRELLO_LIST_ID_NEW_CARD_TO_BE_APPENDED: listIdTweet,
+  TRELLO_listIdIos: listIdIos,
   TWEET_TO_TRELLO_SECRET: correctAppSecret
 } = process.env
 
 module.exports.isValidSecret = appSecret => {
-  if(appSecret !== correctAppSecret) return false
+  if (appSecret !== correctAppSecret) return false
   return true
 }
 
@@ -44,9 +44,9 @@ ${a[2]}`
 
 module.exports.createParams = ({ desc, urlSource, fromTweet, fromIos }) => {
   const params = new URLSearchParams()
-  const list_id = fromTweet ? list_id_tweet : list_id_ios
+  const listId = fromTweet ? listIdTweet : listIdIos
   params.append('pos', 'top')
-  params.append('idList', list_id)
+  params.append('idList', listId)
   params.append('key', key)
   params.append('token', token)
   params.append('desc', desc)
@@ -68,7 +68,7 @@ module.exports.createFormattedTextFromHtml = html => {
     script: false,
     style: false,
     pre: true,
-    comment: false,
+    comment: false
   }
   // parsed should be a formatted DOM element that node-html-parser generates
   const parsed = parseHtml(html, options)
@@ -79,8 +79,8 @@ module.exports.createFormattedTextFromHtml = html => {
 }
 
 module.exports.combineText = (tweetText, pageText) => {
-  let text;
-  if(tweetText) {
+  let text
+  if (tweetText) {
     text = `${tweetText}\n\n---\n\n${pageText}`
   } else {
     text = pageText
@@ -89,9 +89,10 @@ module.exports.combineText = (tweetText, pageText) => {
 }
 
 module.exports.createTrelloCard = async params => {
-  return await fetch('https://api.trello.com/1/cards', {
+  const response = await fetch('https://api.trello.com/1/cards', {
     method: 'post',
     headers: { Accept: 'application/json' },
     body: params
   })
+  return response
 }
