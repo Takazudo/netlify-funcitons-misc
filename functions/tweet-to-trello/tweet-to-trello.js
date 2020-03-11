@@ -1,25 +1,75 @@
 const fetch = require('node-fetch')
 
-exports.handler = async function(event, context) {
+const {
+  createParams,
+  fetchHtml,
+  createFormattedTextFromHtml,
+  combineText,
+  createTrelloCard,
+  isValidSecret
+} = require('./utils')
+
+exports.handler = async (event, context) => {
+
+  if (event.httpMethod !== 'POST'){
+    return {
+      statusCode: 400,
+      body: 'Must POST to this function'
+    }
+  }
+
+  const { tweetText, urlSource, appSecret } = JSON.parse(event.body)
+
+  // check params
+  if(!tweetText || !urlSource || !appSecret) {
+    return {
+      statusCode: 400,
+      body: 'params not enough'
+    }
+  }
+
+  // need valid appSecret
+  if(!isValidSecret(appSecret)) {
+    return {
+      statusCode: 400,
+      body: 'invalid appSecret'
+    }
+  }
+
   try {
-    const response = await fetch('https://icanhazdadjoke.com', {
-      headers: { Accept: 'application/json' }
+    // fetch target page's html as text
+    const html = await fetchHtml(urlSource)
+    const formattedPageText = createFormattedTextFromHtml(html)
+
+    // post to trello
+    const params = createParams({
+      desc: combineText(tweetText, formattedPageText),
+      urlSource
     })
+    const response = await createTrelloCard(params)
+
+    // something wrong
     if (!response.ok) {
       // NOT res.status >= 200 && res.status < 300
-      return { statusCode: response.status, body: response.statusText }
+      const data = await response.json()
+      return {
+        statusCode: response.status,
+        body: response.statusText
+      }
     }
     const data = await response.json()
 
+    // succeeded!
     return {
       statusCode: 200,
-      body: JSON.stringify({ msg: data.joke })
+      body: JSON.stringify(data)
     }
   } catch (err) {
-    console.log(err) // output to netlify function log
+    // something wrong
     return {
       statusCode: 500,
       body: JSON.stringify({ msg: err.message }) // Could be a custom message or object i.e. JSON.stringify(err)
     }
   }
+
 }

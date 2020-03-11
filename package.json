@@ -9,6 +9,8 @@
   "author": "Takazudo",
   "license": "MIT",
   "dependencies": {
-    "node-fetch": "^2.3.0"
+    "dotenv": "^8.2.0",
+    "node-fetch": "^2.3.0",
+    "node-html-parser": "^1.2.12"
   }
 }
