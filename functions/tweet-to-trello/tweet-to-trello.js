@@ -18,6 +18,8 @@ exports.handler = async (event, context) => {
     }
   }
 
+  console.log('=== dumping for debug ===')
+  console.log(event.body)
   const { tweetText, urlSource, appSecret } = JSON.parse(event.body)
 
   // check params
@@ -57,7 +59,10 @@ exports.handler = async (event, context) => {
         body: response.statusText
       }
     }
-    //const data = await response.json()
+
+    const data = await response.json()
+    console.log('=== dumping for debug ===')
+    console.log(data)
 
     // succeeded!
     return {
