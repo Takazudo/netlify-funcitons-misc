@@ -7,7 +7,8 @@ const frontMatter = require('front-matter')
 const {
   TRELLO_API_KEY: key,
   TRELLO_API_TOKEN: token,
-  TRELLO_LIST_ID_NEW_CARD_TO_BE_APPENDED: list_id,
+  TRELLO_LIST_ID_NEW_CARD_TO_BE_APPENDED: list_id_tweet,
+  TRELLO_LIST_ID_IOS: list_id_ios,
   TWEET_TO_TRELLO_SECRET: correctAppSecret
 } = process.env
 
@@ -41,8 +42,9 @@ ${a[2]}`
   }
 }
 
-module.exports.createParams = ({ desc, urlSource }) => {
-  const params = new URLSearchParams();
+module.exports.createParams = ({ desc, urlSource, fromTweet, fromIos }) => {
+  const params = new URLSearchParams()
+  const list_id = fromTweet ? list_id_tweet : list_id_ios
   params.append('pos', 'top')
   params.append('idList', list_id)
   params.append('key', key)

@@ -66,6 +66,8 @@ exports.handler = async (event, context) => {
     // post to trello
     const params = createParams({
       desc: combineText(tweetText, formattedPageText),
+      fromTweet: bodyFormat === 'TEXT',
+      fromIos: bodyFormat === 'JSON',
       urlSource
     })
     const response = await createTrelloCard(params)
