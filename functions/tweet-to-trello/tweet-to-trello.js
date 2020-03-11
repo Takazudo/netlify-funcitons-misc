@@ -93,6 +93,7 @@ exports.handler = async (event, context) => {
     // something wrong
     console.log('ERR: request failed on creating card')
     console.log(err.message)
+    console.log(err)
     return {
       statusCode: 500,
       body: JSON.stringify({ msg: err.message }) // Could be a custom message or object i.e. JSON.stringify(err)
