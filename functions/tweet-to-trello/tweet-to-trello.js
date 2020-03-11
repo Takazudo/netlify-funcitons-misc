@@ -1,4 +1,5 @@
 const fetch = require('node-fetch')
+const frontMatter = require('front-matter')
 
 const {
   createParams,
@@ -19,8 +20,14 @@ exports.handler = async (event, context) => {
   }
 
   console.log('=== dumping for debug ===')
-  const trimmedBody = event.body.replace(/\n+/g, ' ')
-  const { tweetText, urlSource, appSecret } = JSON.parse(trimmedBody)
+  const data = frontMatter(event.body)
+  const {
+    attributes: {
+      url: urlSource,
+      secret: appSecret
+    },
+    body: tweetText
+  } = data
 
   // check params
   if(!tweetText || !urlSource || !appSecret) {
