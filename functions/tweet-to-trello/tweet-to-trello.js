@@ -19,8 +19,8 @@ exports.handler = async (event, context) => {
   }
 
   console.log('=== dumping for debug ===')
-  console.log(event.body)
-  const { tweetText, urlSource, appSecret } = JSON.parse(event.body)
+  const trimmedBody = event.body.replace(/\n+/g, ' ')
+  const { tweetText, urlSource, appSecret } = JSON.parse(trimmedBody)
 
   // check params
   if(!tweetText || !urlSource || !appSecret) {
