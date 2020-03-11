@@ -7,7 +7,8 @@ const {
   combineText,
   createTrelloCard,
   isValidSecret,
-  createDataFromRequestBody
+  createDataFromBodyText,
+  createDataFromJSON
 } = require('./utils')
 
 exports.handler = async (event, context) => {
@@ -22,10 +23,12 @@ exports.handler = async (event, context) => {
     }
   }
 
-  const { tweetText, urlSource, appSecret } = createDataFromRequestBody(event.body)
+  const bodyFormat = event.headers['x-bodyformat'] || 'TEXT'
+  const converter = bodyFormat === 'JSON' ? createDataFromJSON : createDataFromBodyText;
+  const { tweetText, urlSource, appSecret } = converter(event.body)
 
   // check params
-  if(!tweetText || !urlSource || !appSecret) {
+  if(!urlSource || !appSecret) {
     console.log('ERR: params not enough')
     return {
       statusCode: 400,

@@ -16,9 +16,18 @@ module.exports.isValidSecret = appSecret => {
   return true
 }
 
+module.exports.createDataFromJSON = bodyContent => {
+  const parsed = JSON.parse(bodyContent)
+  return {
+    tweetText: null,
+    urlSource: parsed.url,
+    appSecret: parsed.secret
+  }
+}
+
 // ___LINE1___url: {{LinkURL}}___LINE2___secret: TAKAZUDOOWNS___LINE3___{{Text}}
-module.exports.createDataFromRequestBody = rawBody => {
-  const a = rawBody.split('___LINE___')
+module.exports.createDataFromBodyText = bodyContent => {
+  const a = bodyContent.split('___LINE___')
   const str = `---
 ${a[0]}
 ${a[1]}
@@ -68,7 +77,12 @@ module.exports.createFormattedTextFromHtml = html => {
 }
 
 module.exports.combineText = (tweetText, pageText) => {
-  const text = `${tweetText}\n\n---\n\n${pageText}`
+  let text;
+  if(tweetText) {
+    text = `${tweetText}\n\n---\n\n${pageText}`
+  } else {
+    text = pageText
+  }
   return text.slice(0, 16384)
 }
 
