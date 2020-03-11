@@ -19,8 +19,6 @@ exports.handler = async (event, context) => {
     }
   }
 
-  console.log('=== dumping for debug ===')
-  console.log(event.body)
   const { tweetText, urlSource, appSecret } = createDataFromRequestBody(event.body)
 
   // check params
