@@ -6,14 +6,20 @@ const {
   createTrelloCard,
   isValidSecret,
   createDataFromBodyText,
-  createDataFromJSON
+  createDataFromJSON,
+  notifyFailure
 } = require('./utils')
+
+const raiseError = message => {
+  console.log(message)
+  notifyFailure(message)
+}
 
 exports.handler = async (event, context) => {
   console.log('=== request accepted ===')
 
   if (event.httpMethod !== 'POST') {
-    console.log('ERR: method is not post')
+    raiseError('ERR: method is not post')
     return {
       statusCode: 400,
       body: 'Must POST to this function'
@@ -26,7 +32,7 @@ exports.handler = async (event, context) => {
 
   // check params
   if (!urlSource || !appSecret) {
-    console.log('ERR: params not enough')
+    raiseError('ERR: params not enough')
     return {
       statusCode: 400,
       body: 'params not enough'
@@ -35,7 +41,7 @@ exports.handler = async (event, context) => {
 
   // need valid appSecret
   if (!isValidSecret(appSecret)) {
-    console.log('ERR: invalid appSecret')
+    raiseError('ERR: invalid appSecret')
     return {
       statusCode: 400,
       body: 'invalid appSecret'
@@ -49,7 +55,7 @@ exports.handler = async (event, context) => {
     const html = await fetchHtml(urlSource)
     formattedPageText = createFormattedTextFromHtml(html)
   } catch (err) {
-    console.log('ERR: fetching page failed')
+    raiseError('ERR: fetching page failed')
     console.log(err)
     // something wrong
     return {
@@ -70,7 +76,7 @@ exports.handler = async (event, context) => {
 
     // something wrong
     if (!response.ok) {
-      console.log('ERR: trello api says response.ok is false')
+      raiseError('ERR: trello api says response.ok is false')
       // NOT res.status >= 200 && res.status < 300
       const data = await response.json()
       console.log(data)
@@ -91,7 +97,7 @@ exports.handler = async (event, context) => {
     }
   } catch (err) {
     // something wrong
-    console.log('ERR: request failed on creating card')
+    raiseError('ERR: request failed on creating card')
     console.log(err.message)
     console.log(err)
     return {

@@ -12,6 +12,7 @@
     "dotenv": "^8.2.0",
     "front-matter": "^3.1.0",
     "node-fetch": "^2.3.0",
-    "node-html-parser": "^1.2.12"
+    "node-html-parser": "^1.2.12",
+    "sendmail": "^1.6.1"
   }
 }

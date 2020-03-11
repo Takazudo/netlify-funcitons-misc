@@ -1,4 +1,5 @@
 require('dotenv').config()
+const sendMail = require('sendmail')()
 const { URLSearchParams } = require('url')
 const fetch = require('node-fetch')
 const parseHtml = require('node-html-parser').parse
@@ -95,4 +96,19 @@ module.exports.createTrelloCard = async params => {
     body: params
   })
   return response
+}
+
+module.exports.notifyFailure = message => {
+  const descriptor = {
+    from: `"TRBKM" <${process.env.CONTACT_EMAIL}>`,
+    to: process.env.CONTACT_EMAIL,
+    subject: `[TRBKM] Failed ${message}`,
+    text: message
+  }
+  sendMail(descriptor, e => {
+    if (e) {
+      console.log('ERR: mail sent falled')
+    } else {
+    }
+  })
 }
