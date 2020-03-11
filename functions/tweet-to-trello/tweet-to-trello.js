@@ -1,5 +1,4 @@
 const fetch = require('node-fetch')
-const frontMatter = require('front-matter')
 
 const {
   createParams,
@@ -7,7 +6,8 @@ const {
   createFormattedTextFromHtml,
   combineText,
   createTrelloCard,
-  isValidSecret
+  isValidSecret,
+  createDataFromRequestBody
 } = require('./utils')
 
 exports.handler = async (event, context) => {
@@ -20,14 +20,8 @@ exports.handler = async (event, context) => {
   }
 
   console.log('=== dumping for debug ===')
-  const data = frontMatter(event.body)
-  const {
-    attributes: {
-      url: urlSource,
-      secret: appSecret
-    },
-    body: tweetText
-  } = data
+  console.log(event.body)
+  const { tweetText, urlSource, appSecret } = createDataFromRequestBody(event.body)
 
   // check params
   if(!tweetText || !urlSource || !appSecret) {

@@ -2,6 +2,7 @@ require('dotenv').config()
 const { URLSearchParams } = require('url');
 const fetch = require('node-fetch')
 const parseHtml = require('node-html-parser').parse
+const frontMatter = require('front-matter')
 
 const {
   TRELLO_API_KEY: key,
@@ -13,6 +14,22 @@ const {
 module.exports.isValidSecret = appSecret => {
   if(appSecret !== correctAppSecret) return false
   return true
+}
+
+// ___LINE1___url: {{LinkURL}}___LINE2___secret: TAKAZUDOOWNS___LINE3___{{Text}}
+module.exports.createDataFromRequestBody = rawBody => {
+  const a = rawBody.split('___LINE___')
+  const str = `---
+${a[0]}
+${a[1]}
+---
+${a[2]}`
+  const data = frontMatter(str)
+  return {
+    tweetText: data.body,
+    urlSource: data.attributes.url,
+    appSecret: data.attributes.secret
+  }
 }
 
 module.exports.createParams = ({ desc, urlSource }) => {
