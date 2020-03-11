@@ -8,7 +8,7 @@ const {
   TRELLO_API_KEY: key,
   TRELLO_API_TOKEN: token,
   TRELLO_LIST_ID_NEW_CARD_TO_BE_APPENDED: listIdTweet,
-  TRELLO_listIdIos: listIdIos,
+  TRELLO_LIST_ID_IOS: listIdIos,
   TWEET_TO_TRELLO_SECRET: correctAppSecret
 } = process.env
 
