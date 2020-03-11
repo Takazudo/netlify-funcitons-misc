@@ -57,12 +57,12 @@ exports.handler = async (event, context) => {
         body: response.statusText
       }
     }
-    const data = await response.json()
+    //const data = await response.json()
 
     // succeeded!
     return {
       statusCode: 200,
-      body: JSON.stringify(data)
+      body: '' //JSON.stringify(data)
     }
   } catch (err) {
     // something wrong
