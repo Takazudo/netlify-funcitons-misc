@@ -4,6 +4,8 @@ const { URLSearchParams } = require('url')
 const fetch = require('node-fetch')
 const parseHtml = require('node-html-parser').parse
 const frontMatter = require('front-matter')
+const tall = require('tall').tall
+const nodemailer = require('nodemailer');
 
 const {
   TRELLO_API_KEY: key,
@@ -13,6 +15,15 @@ const {
   TWEET_TO_TRELLO_SECRET: correctAppSecret
 } = process.env
 
+module.exports.unshortenUrl = async url => {
+  try {
+  const unshortenUrl = await tall(url)
+  console.log('Tall url', unshortenUrl)
+  } catch(error) {
+  console.log('GOT ERROR!', error)
+  }
+}
+
 module.exports.isValidSecret = appSecret => {
   if (appSecret !== correctAppSecret) return false
   return true
@@ -21,9 +32,9 @@ module.exports.isValidSecret = appSecret => {
 module.exports.createDataFromJSON = bodyContent => {
   const parsed = JSON.parse(bodyContent)
   return {
-    tweetText: null,
-    urlSource: parsed.url,
-    appSecret: parsed.secret
+  tweetText: null,
+  urlSource: parsed.url,
+  appSecret: parsed.secret
   }
 }
 
@@ -37,9 +48,9 @@ ${a[1]}
 ${a[2]}`
   const data = frontMatter(str)
   return {
-    tweetText: data.body,
-    urlSource: data.attributes.url,
-    appSecret: data.attributes.secret
+  tweetText: data.body,
+  urlSource: data.attributes.url,
+  appSecret: data.attributes.secret
   }
 }
 
@@ -58,7 +69,7 @@ module.exports.createParams = ({ desc, urlSource, fromTweet, fromIos }) => {
 module.exports.fetchHtml = async url => {
   const response = await fetch(url)
   if (!response.ok) {
-    return false
+  return false
   }
   const data = await response.text()
   return data
@@ -66,49 +77,60 @@ module.exports.fetchHtml = async url => {
 
 module.exports.createFormattedTextFromHtml = html => {
   const options = {
-    script: false,
-    style: false,
-    pre: true,
-    comment: false
+  script: false,
+  style: false,
+  pre: true,
+  comment: false
   }
   // parsed should be a formatted DOM element that node-html-parser generates
   const parsed = parseHtml(html, options)
   // we don't need many line breaks
   return parsed.text
-    .replace(/\n\s+/g, '\n')
-    .replace(/\n\n\n+/g, '\n\n')
+  .replace(/\n\s+/g, '\n')
+  .replace(/\n\n\n+/g, '\n\n')
 }
 
 module.exports.combineText = (tweetText, pageText) => {
   let text
   if (tweetText) {
-    text = `${tweetText}\n\n---\n\n${pageText}`
+  text = `${tweetText}\n\n---\n\n${pageText}`
   } else {
-    text = pageText
+  text = pageText
   }
   return text.slice(0, 16384)
 }
 
 module.exports.createTrelloCard = async params => {
   const response = await fetch('https://api.trello.com/1/cards', {
-    method: 'post',
-    headers: { Accept: 'application/json' },
-    body: params
+  method: 'post',
+  headers: { Accept: 'application/json' },
+  body: params
   })
   return response
 }
 
 module.exports.notifyFailure = message => {
-  const descriptor = {
-    from: `"TRBKM" <${process.env.CONTACT_EMAIL}>`,
-    to: process.env.CONTACT_EMAIL,
+  const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.GMAIL_SENDER_ADDRESS ,
+      pass: process.env.GMAIL_SENDER_PASSWORD,
+    }
+  });
+
+  transporter.sendMail({
+    from: `"TRBKM" <${process.env.GMAIL_SENDER_ADDRESS}>`,
+    to: process.env.ERROR_REPORT_TO,
     subject: `[TRBKM] Failed ${message}`,
     text: message
-  }
-  sendMail(descriptor, e => {
-    if (e) {
+  }, function(error, info) {
+  	if (error) {
       console.log('ERR: mail sent falled')
-    } else {
+      console.log(error)
+  	} else {
+      console.log('mail sent seems ok')
     }
-  })
+  });
 }

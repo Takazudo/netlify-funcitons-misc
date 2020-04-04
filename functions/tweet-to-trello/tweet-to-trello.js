@@ -7,7 +7,8 @@ const {
   isValidSecret,
   createDataFromBodyText,
   createDataFromJSON,
-  notifyFailure
+  notifyFailure,
+  unshortenUrl
 } = require('./utils')
 
 const raiseError = message => {
@@ -48,6 +49,19 @@ exports.handler = async (event, context) => {
     }
   }
 
+  // == expand url ==
+
+  let expandedUrl
+
+  try {
+    expandedUrl = unshortenUrl(urlSource)
+  } catch (error) {
+    raiseError('ERR: tall failed. Anyway keep going.')
+    expandedUrl = urlSource
+  }
+
+  // == fetch formatted page text ==
+
   let formattedPageText
 
   try {
@@ -55,7 +69,7 @@ exports.handler = async (event, context) => {
     const html = await fetchHtml(urlSource)
     formattedPageText = createFormattedTextFromHtml(html)
   } catch (err) {
-    raiseError('ERR: fetching page failed')
+    raiseError(`ERR: fetching page failed. ${urlSource}`)
     console.log(err)
     // something wrong
     return {
@@ -76,7 +90,7 @@ exports.handler = async (event, context) => {
 
     // something wrong
     if (!response.ok) {
-      raiseError('ERR: trello api says response.ok is false')
+      raiseError(`ERR: trello api says response.ok is false ${urlSource}`)
       // NOT res.status >= 200 && res.status < 300
       const data = await response.json()
       console.log(data)
@@ -97,7 +111,7 @@ exports.handler = async (event, context) => {
     }
   } catch (err) {
     // something wrong
-    raiseError('ERR: request failed on creating card')
+    raiseError(`ERR: request failed on creating card ${urlSource}`)
     console.log(err.message)
     console.log(err)
     return {
