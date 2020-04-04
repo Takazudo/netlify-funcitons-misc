@@ -1,5 +1,4 @@
 require('dotenv').config()
-const sendMail = require('sendmail')()
 const { URLSearchParams } = require('url')
 const fetch = require('node-fetch')
 const parseHtml = require('node-html-parser').parse
@@ -126,10 +125,10 @@ module.exports.notifyFailure = message => {
     subject: `[TRBKM] Failed ${message}`,
     text: message
   }, function(error, info) {
-  	if (error) {
+    if (error) {
       console.log('ERR: mail sent falled')
       console.log(error)
-  	} else {
+    } else {
       console.log('mail sent seems ok')
     }
   });
