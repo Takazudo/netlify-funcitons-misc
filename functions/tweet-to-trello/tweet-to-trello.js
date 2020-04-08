@@ -7,9 +7,12 @@ const {
   isValidSecret,
   createDataFromBodyText,
   createDataFromJSON,
-  notifyFailure,
   unshortenUrl
 } = require('./utils')
+
+const {
+  notifyFailure
+} = require('./mail-sender')
 
 const raiseError = message => {
   console.log(message)
