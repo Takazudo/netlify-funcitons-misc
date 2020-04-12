@@ -17,6 +17,7 @@ module.exports.unshortenUrl = async (url) => {
   try {
     const unshortenUrl = await tall(url);
     console.log("Tall url", unshortenUrl);
+    return unshortenUrl
   } catch (error) {
     console.log("GOT ERROR!", error);
   }

@@ -57,7 +57,7 @@ exports.handler = async (event, context) => {
   let expandedUrl
 
   try {
-    expandedUrl = unshortenUrl(urlSource)
+    expandedUrl = await unshortenUrl(urlSource)
   } catch (error) {
     raiseError('ERR: tall failed. Anyway keep going.')
     expandedUrl = urlSource
@@ -69,10 +69,10 @@ exports.handler = async (event, context) => {
 
   try {
     // fetch target page's html as text
-    const html = await fetchHtml(urlSource)
+    const html = await fetchHtml(expandedUrl)
     formattedPageText = createFormattedTextFromHtml(html)
   } catch (err) {
-    raiseError(`ERR: fetching page failed. ${urlSource}`)
+    raiseError(`ERR: fetching page failed. ${expandedUrl}`)
     console.log(err)
     // something wrong
     return {
@@ -87,13 +87,13 @@ exports.handler = async (event, context) => {
       desc: combineText(tweetText, formattedPageText),
       fromTweet: bodyFormat === 'TEXT',
       fromIos: bodyFormat === 'JSON',
-      urlSource
+      urlSource: expandedUrl
     })
     const response = await createTrelloCard(params)
 
     // something wrong
     if (!response.ok) {
-      raiseError(`ERR: trello api says response.ok is false ${urlSource}`)
+      raiseError(`ERR: trello api says response.ok is false ${expandedUrl}`)
       // NOT res.status >= 200 && res.status < 300
       const data = await response.json()
       console.log(data)
@@ -114,7 +114,7 @@ exports.handler = async (event, context) => {
     }
   } catch (err) {
     // something wrong
-    raiseError(`ERR: request failed on creating card ${urlSource}`)
+    raiseError(`ERR: request failed on creating card ${expandedUrl}`)
     console.log(err.message)
     console.log(err)
     return {
