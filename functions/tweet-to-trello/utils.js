@@ -14,6 +14,9 @@ const {
 } = process.env;
 
 module.exports.unshortenUrl = async (url) => {
+  if(/youtube/.test(url)) {
+    return url
+  }
   try {
     const unshortenUrl = await tall(url);
     console.log("Tall url", unshortenUrl);

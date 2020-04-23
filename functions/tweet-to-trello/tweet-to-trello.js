@@ -57,7 +57,13 @@ exports.handler = async (event, context) => {
   let expandedUrl
 
   try {
+    let gotResult = false
+    setTimeout(() => {
+      if(gotResult) return
+      throw new Error('oops')
+    }, 5000)
     expandedUrl = await unshortenUrl(urlSource)
+    gotResult = true
   } catch (error) {
     raiseError('ERR: tall failed. Anyway keep going.')
     expandedUrl = urlSource
