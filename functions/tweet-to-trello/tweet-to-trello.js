@@ -60,7 +60,8 @@ exports.handler = async (event, context) => {
     let gotResult = false
     setTimeout(() => {
       if(gotResult) return
-      throw new Error('oops')
+      throw new Error('oops tall timeout')
+      expandedUrl = urlSource
     }, 5000)
     expandedUrl = await unshortenUrl(urlSource)
     gotResult = true
