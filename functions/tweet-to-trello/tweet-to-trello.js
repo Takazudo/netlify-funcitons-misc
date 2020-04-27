@@ -75,7 +75,7 @@ exports.handler = async (event) => {
     case "bookmark":
       console.log("==== strategy: bookmark ====");
       const resp = await require("./handleBookmark")({ event });
-      sendFetchPageText(resp.body.cardId, event.path);
+      await sendFetchPageText(resp.body.cardId, event.path);
       break;
     case "expandUrl":
       console.log("==== strategy: expandUrl ====");
