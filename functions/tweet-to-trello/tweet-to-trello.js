@@ -1,17 +1,4 @@
-const {
-  createParams,
-  fetchHtml,
-  createFormattedTextFromHtml,
-  combineText,
-  createTrelloCard,
-  isValidSecret,
-  createDataFromBodyText,
-  createDataFromJSON,
-  unshortenUrl,
-} = require("./utils");
-
 const fetch = require("node-fetch");
-
 const { notifyFailure } = require("./mail-sender");
 
 const raiseError = (message) => {
@@ -51,13 +38,13 @@ const sendExpandUrlRequest = async (cardId, path) => {
   });
 };
 
-exports.handler = async (event) => {
+exports.handler = async (event, context) => {
   if (event.httpMethod !== "POST") {
     raiseError("ERR: method is not post");
     return {
       statusCode: 400,
       body: "Must POST to this function",
-    };
+    }
   }
 
   const strategy = event.headers["x-strategy"] || "bookmark";
@@ -71,29 +58,25 @@ exports.handler = async (event) => {
 
   switch (strategy) {
     case "bookmark":
-      Promise.all;
       const cardId = await require("./handleBookmark")({ event });
-      return Promise.all([
+      await Promise.all([
         sendFetchPageTextRequest(cardId, event.path),
         sendExpandUrlRequest(cardId, event.path),
-      ]).then(() => {
-        console.log(`==== /${strategy} ====`);
-        return okRespnose;
-      });
+      ]);
+      console.log('boom')
       break;
     case "expandUrl":
-      return require("./handleExpandUrl")({ event }).then(() => {
-        console.log(`==== /${strategy} ====`);
-        return okRespnose;
-      });
+      await require("./handleExpandUrl")({ event });
       break;
     case "fetchPageText":
-      return require("./handleFetchPageText")({ event }).then(() => {
-        console.log(`==== /${strategy} ====`);
-        return okRespnose;
-      });
+      await require("./handleFetchPageText")({ event });
       break;
     default:
       break;
   }
+
+  console.log(`==== /${strategy} ====`);
+
+  return okRespnose
+
 };
