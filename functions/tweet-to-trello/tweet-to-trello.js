@@ -1,13 +1,15 @@
 const { sendFetchPageTextRequest, sendExpandUrlRequest } = require("./utils");
-const fetch = require("node-fetch");
 const { notifyFailure, notifyOk } = require("./mail-sender");
+const handleBookmark = require('./handleBookmark')
+const handleExpandUrl = require('./handleExpandUrl')
+const handleFetchPageText = require('./handleFetchPageText')
 
 const raiseError = (message) => {
   console.log(message);
   notifyFailure(message);
 };
 
-exports.handler = (event, context, callback) => {
+exports.handler = async (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false
 
   if (event.httpMethod !== "POST") {
@@ -29,32 +31,25 @@ exports.handler = (event, context, callback) => {
 
   switch (strategy) {
     case "bookmark":
-      require("./handleBookmark")({ event })
-        .then(({ cardId, cardName }) => {
-          notifyOk(cardName)
-          return Promise.all([
-            sendFetchPageTextRequest(cardId, event.path),
-            sendExpandUrlRequest(cardId, event.path),
-          ]);
-        })
-        .then(() => {
-          console.log(`==== /${strategy} ====`);
-          callback(null, okRespnose);
-        });
+      const { cardId, cardName } = await handleBookmark({ event })
+      notifyOk(cardName)
+      await Promise.all([
+        sendFetchPageTextRequest(cardId, event.path),
+        sendExpandUrlRequest(cardId, event.path),
+      ]);
       break;
     case "expandUrl":
-      require("./handleExpandUrl")({ event }).then(() => {
-        console.log(`==== /${strategy} ====`);
-        callback(null, okRespnose);
-      });
+      await handleExpandUrl({ event })
       break;
     case "fetchPageText":
-      require("./handleFetchPageText")({ event }).then(() => {
-        console.log(`==== /${strategy} ====`);
-        callback(null, okRespnose);
-      });
+      await handleFetchPageText({ event })
       break;
     default:
       break;
   }
+
+  console.log(`==== /${strategy} ====`);
+
+  return okRespnose
+
 };
