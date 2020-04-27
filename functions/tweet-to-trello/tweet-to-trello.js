@@ -30,7 +30,7 @@ exports.handler = async (event, context) => {
       notifyOk(cardName)
       sendFetchPageTextRequest(cardId, event.path),
       sendExpandUrlRequest(cardId, event.path),
-      await new Promise(resolve => setTimeout(resolve, 5000))
+      await new Promise(resolve => setTimeout(resolve, 2000))
       break;
     case "expandUrl":
       await handleExpandUrl({ event })
