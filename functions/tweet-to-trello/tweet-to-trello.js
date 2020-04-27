@@ -68,10 +68,10 @@ exports.handler = async (event) => {
   switch (strategy) {
     case "bookmark":
       Promise.all;
-      const resp = await require("./handleBookmark")({ event });
+      const cardId = await require("./handleBookmark")({ event });
       await Promise.all([
-        sendFetchPageTextRequest(resp.body.cardId, event.path),
-        sendExpandUrlRequest(resp.body.cardId, event.path)
+        sendFetchPageTextRequest(cardId, event.path),
+        sendExpandUrlRequest(cardId, event.path)
       ]);
       break;
     case "expandUrl":
