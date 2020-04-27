@@ -24,11 +24,6 @@ exports.handler = async (event, context) => {
 
   console.log(`==== ${strategy} ====`);
 
-  const okRespnose = {
-    statusCode: 200,
-    body: "done",
-  };
-
   switch (strategy) {
     case "bookmark":
       const { cardId, cardName } = await handleBookmark({ event })
@@ -50,6 +45,10 @@ exports.handler = async (event, context) => {
 
   console.log(`==== /${strategy} ====`);
 
-  return okRespnose
+  return {
+    statusCode: 200,
+    body: "done",
+  };
+
 
 };
