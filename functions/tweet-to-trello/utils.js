@@ -149,3 +149,35 @@ module.exports.addUrlAttachment = async (cardId, url) => {
   });
   return response;
 }
+
+module.exports.sendFetchPageTextRequest = async (cardId, path) => {
+  const url = `${process.env.URL}${path}`;
+  console.log("sending fetchPageText request to:", url);
+  return fetch(url, {
+    method: "post",
+    headers: {
+      "x-strategy": "fetchPageText",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      secret: process.env.TWEET_TO_TRELLO_SECRET,
+      cardId,
+    }),
+  });
+};
+
+module.exports.sendExpandUrlRequest = async (cardId, path) => {
+  const url = `${process.env.URL}${path}`;
+  console.log("sending expandUrl request to:", url);
+  return fetch(url, {
+    method: "post",
+    headers: {
+      "x-strategy": "expandUrl",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      secret: process.env.TWEET_TO_TRELLO_SECRET,
+      cardId,
+    }),
+  });
+};

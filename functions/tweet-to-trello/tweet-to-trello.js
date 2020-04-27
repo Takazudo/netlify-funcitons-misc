@@ -1,3 +1,4 @@
+const { sendFetchPageTextRequest, sendExpandUrlRequest } = require("./utils");
 const fetch = require("node-fetch");
 const { notifyFailure } = require("./mail-sender");
 
@@ -6,45 +7,13 @@ const raiseError = (message) => {
   notifyFailure(message);
 };
 
-const sendFetchPageTextRequest = async (cardId, path) => {
-  const url = `${process.env.URL}${path}`;
-  console.log("sending fetchPageText request to:", url);
-  return fetch(url, {
-    method: "post",
-    headers: {
-      "x-strategy": "fetchPageText",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      secret: process.env.TWEET_TO_TRELLO_SECRET,
-      cardId,
-    }),
-  });
-};
-
-const sendExpandUrlRequest = async (cardId, path) => {
-  const url = `${process.env.URL}${path}`;
-  console.log("sending expandUrl request to:", url);
-  return fetch(url, {
-    method: "post",
-    headers: {
-      "x-strategy": "expandUrl",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      secret: process.env.TWEET_TO_TRELLO_SECRET,
-      cardId,
-    }),
-  });
-};
-
-exports.handler = async (event, context) => {
+exports.handler = (event, context, callback) => {
   if (event.httpMethod !== "POST") {
     raiseError("ERR: method is not post");
-    return {
+    callback(null, {
       statusCode: 400,
       body: "Must POST to this function",
-    }
+    });
   }
 
   const strategy = event.headers["x-strategy"] || "bookmark";
@@ -58,25 +27,31 @@ exports.handler = async (event, context) => {
 
   switch (strategy) {
     case "bookmark":
-      const cardId = await require("./handleBookmark")({ event });
-      await Promise.all([
-        sendFetchPageTextRequest(cardId, event.path),
-        sendExpandUrlRequest(cardId, event.path),
-      ]);
-      console.log('boom')
+      require("./handleBookmark")({ event })
+        .then((cardId) => {
+          return Promise.all([
+            sendFetchPageTextRequest(cardId, event.path),
+            sendExpandUrlRequest(cardId, event.path),
+          ]);
+        })
+        .then(() => {
+          console.log(`==== /${strategy} ====`);
+          callback(null, okRespnose);
+        });
       break;
     case "expandUrl":
-      await require("./handleExpandUrl")({ event });
+      require("./handleExpandUrl")({ event }).then(() => {
+        console.log(`==== /${strategy} ====`);
+        callback(null, okRespnose);
+      });
       break;
     case "fetchPageText":
-      await require("./handleFetchPageText")({ event });
+      require("./handleFetchPageText")({ event }).then(() => {
+        console.log(`==== /${strategy} ====`);
+        callback(null, okRespnose);
+      });
       break;
     default:
       break;
   }
-
-  console.log(`==== /${strategy} ====`);
-
-  return okRespnose
-
 };
