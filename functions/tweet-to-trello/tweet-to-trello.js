@@ -28,10 +28,9 @@ exports.handler = async (event, context) => {
     case "bookmark":
       const { cardId, cardName } = await handleBookmark({ event })
       notifyOk(cardName)
-      await Promise.all([
-        sendFetchPageTextRequest(cardId, event.path),
-        sendExpandUrlRequest(cardId, event.path),
-      ]);
+      sendFetchPageTextRequest(cardId, event.path),
+      sendExpandUrlRequest(cardId, event.path),
+      await new Promise(resolve => setTimeout(resolve, 5000))
       break;
     case "expandUrl":
       await handleExpandUrl({ event })
