@@ -23,8 +23,12 @@ module.exports = async ({ event }) => {
 
   // check params
 
-  if (!cardId || !secret) {
-    raiseError("ERR: params not enough");
+  if (!cardId) {
+    raiseError("ERR: params not enough: cardId (fetchPageText)");
+    return;
+  }
+  if (!secret) {
+    raiseError("ERR: params not enough: secret (fetchPageText)");
     return;
   }
 
