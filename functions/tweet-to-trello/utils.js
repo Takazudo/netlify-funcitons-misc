@@ -14,12 +14,11 @@ const {
 } = process.env;
 
 module.exports.unshortenUrl = async (url) => {
-  if(/youtube/.test(url)) {
-    return url
-  }
+  if(/youtube/.test(url)) return url
   try {
     const unshortenUrl = await tall(url);
     console.log("Tall url", unshortenUrl);
+    if(/youtube/.test(url)) return url
     return unshortenUrl
   } catch (error) {
     console.log("GOT ERROR!", error);
@@ -63,7 +62,7 @@ module.exports.createParams = ({ desc, urlSource, fromTweet, fromIos }) => {
   params.append("idList", listId);
   params.append("key", key);
   params.append("token", token);
-  params.append("desc", desc);
+  if(desc) params.append("desc", desc);
   params.append("urlSource", urlSource);
   return params;
 };
@@ -101,6 +100,7 @@ module.exports.combineText = (tweetText, pageText) => {
 };
 
 module.exports.createTrelloCard = async (params) => {
+  //console.log(params)
   const response = await fetch("https://api.trello.com/1/cards", {
     method: "post",
     headers: { Accept: "application/json" },
@@ -108,3 +108,30 @@ module.exports.createTrelloCard = async (params) => {
   });
   return response;
 };
+
+module.exports.fetchCard = async (cardId) => {
+  const params = new URLSearchParams();
+  params.append("key", process.env.TRELLO_API_KEY);
+  params.append("token", process.env.TRELLO_API_TOKEN);
+  params.append("attachments", "true");
+
+  const response = await fetch(`https://api.trello.com/1/card/${cardId}?${params}`, {
+    method: "get",
+    headers: { Accept: "application/json" }
+  });
+  return response;
+}
+
+module.exports.updateCardDesc = async (id, desc) => {
+  const params = new URLSearchParams();
+  params.append("key", process.env.TRELLO_API_KEY);
+  params.append("token", process.env.TRELLO_API_TOKEN);
+  params.append("desc", desc);
+
+  const response = await fetch(`https://api.trello.com/1/cards/${id}`, {
+    method: "put",
+    headers: { Accept: "application/json" },
+    body: params
+  });
+  return response;
+}

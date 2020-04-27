@@ -7,126 +7,90 @@ const {
   isValidSecret,
   createDataFromBodyText,
   createDataFromJSON,
-  unshortenUrl
-} = require('./utils')
+  unshortenUrl,
+} = require("./utils");
 
-const {
-  notifyFailure
-} = require('./mail-sender')
+const fetch = require("node-fetch");
 
-const raiseError = message => {
-  console.log(message)
-  notifyFailure(message)
-}
+const { notifyFailure } = require("./mail-sender");
 
-exports.handler = async (event, context) => {
-  console.log('=== request accepted ===')
+const raiseError = (message) => {
+  console.log(message);
+  notifyFailure(message);
+};
 
-  if (event.httpMethod !== 'POST') {
-    raiseError('ERR: method is not post')
-    return {
-      statusCode: 400,
-      body: 'Must POST to this function'
-    }
-  }
-
-  const bodyFormat = event.headers['x-bodyformat'] || 'TEXT'
-  const converter = bodyFormat === 'JSON' ? createDataFromJSON : createDataFromBodyText
-  const { tweetText, urlSource, appSecret } = converter(event.body)
-
-  // check params
-  if (!urlSource || !appSecret) {
-    raiseError('ERR: params not enough')
-    return {
-      statusCode: 400,
-      body: 'params not enough'
-    }
-  }
-
-  // need valid appSecret
-  if (!isValidSecret(appSecret)) {
-    raiseError('ERR: invalid appSecret')
-    return {
-      statusCode: 400,
-      body: 'invalid appSecret'
-    }
-  }
-
-  // == expand url ==
-
-  let expandedUrl
-
-  try {
-    let gotResult = false
-    setTimeout(() => {
-      if(gotResult) return
-      throw new Error('oops tall timeout')
-      expandedUrl = urlSource
-    }, 5000)
-    expandedUrl = await unshortenUrl(urlSource)
-    gotResult = true
-  } catch (error) {
-    raiseError('ERR: tall failed. Anyway keep going.')
-    expandedUrl = urlSource
-  }
-
-  // == fetch formatted page text ==
-
-  let formattedPageText
-
-  try {
-    // fetch target page's html as text
-    const html = await fetchHtml(expandedUrl)
-    formattedPageText = createFormattedTextFromHtml(html)
-  } catch (err) {
-    raiseError(`ERR: fetching page failed. ${expandedUrl}`)
-    console.log(err)
-    // something wrong
-    return {
-      statusCode: 500,
-      body: ''
-    }
-  }
-
-  try {
-    // post to trello
-    const params = createParams({
-      desc: combineText(tweetText, formattedPageText),
-      fromTweet: bodyFormat === 'TEXT',
-      fromIos: bodyFormat === 'JSON',
-      urlSource: expandedUrl
+/*
+const sendExtraRequest = () => {
+  const { URLSearchParams } = require("url");
+  const params = new URLSearchParams();
+  console.log('trying to send...')
+  console.log(params)
+  const fetch = require("node-fetch");
+  const promise = fetch("http://localhost:8888/.netlify/functions/tweet-to-trello", {
+    method: "POST",
+    headers: {
+      'x-extrarequest': '1',
+      'x-bodyformat': 'JSON',
+      Accept: "application/json"
+    },
+    body: JSON.stringify({
+      "secret": process.env.TWEET_TO_TRELLO_SECRET,
+      "url": 'https://www.w3schools.com/js/js_switch.asp'
     })
-    const response = await createTrelloCard(params)
-
-    // something wrong
-    if (!response.ok) {
-      raiseError(`ERR: trello api says response.ok is false ${expandedUrl}`)
-      // NOT res.status >= 200 && res.status < 300
-      const data = await response.json()
-      console.log(data)
-      return {
-        statusCode: response.status,
-        body: response.statusText
-      }
-    }
-
-    // const data = await response.json()
-
-    console.log('DONE: succeeded')
-    // succeeded!
-    return {
-      statusCode: 200,
-      body: ''
-      // body: JSON.stringify(data)
-    }
-  } catch (err) {
-    // something wrong
-    raiseError(`ERR: request failed on creating card ${expandedUrl}`)
-    console.log(err.message)
-    console.log(err)
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ msg: err.message }) // Could be a custom message or object i.e. JSON.stringify(err)
-    }
-  }
+  });
+  return promise;
 }
+*/
+
+const sendFetchPageText = async (cardId, path) => {
+  const url = `${process.env.URL}${path}`
+  return fetch(url, {
+    method: "POST",
+    headers: {
+      "x-strategy": "fetchPageText",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      secret: process.env.TWEET_TO_TRELLO_SECRET,
+      cardId
+    }),
+  });
+};
+
+exports.handler = async (event) => {
+  console.log("=== request accepted ===");
+
+  if (event.httpMethod !== "POST") {
+    raiseError("ERR: method is not post");
+    return {
+      statusCode: 400,
+      body: "Must POST to this function",
+    };
+  }
+
+  const strategy = event.headers["x-strategy"] || "bookmark";
+
+  switch (strategy) {
+    case "bookmark":
+      console.log("==== strategy: bookmark ====");
+      const resp = await require("./handleBookmark")({ event });
+      sendFetchPageText(resp.body.cardId, event.path);
+      break;
+    case "expandUrl":
+      console.log("==== strategy: expandUrl ====");
+      //return handleExpandUrl();
+      break;
+    case "fetchPageText":
+      console.log("==== strategy: fetchPageText ====");
+      require("./handleFetchPageText")({ event });
+      break;
+    default:
+      break;
+  }
+
+  return {
+    statusCode: 200,
+    body: 'done'
+  };
+
+};
