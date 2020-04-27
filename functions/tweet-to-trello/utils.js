@@ -122,14 +122,28 @@ module.exports.fetchCard = async (cardId) => {
   return response;
 }
 
-module.exports.updateCardDesc = async (id, desc) => {
+module.exports.updateCardDesc = async (cardId, desc) => {
   const params = new URLSearchParams();
   params.append("key", process.env.TRELLO_API_KEY);
   params.append("token", process.env.TRELLO_API_TOKEN);
   params.append("desc", desc);
 
-  const response = await fetch(`https://api.trello.com/1/cards/${id}`, {
+  const response = await fetch(`https://api.trello.com/1/cards/${cardId}`, {
     method: "put",
+    headers: { Accept: "application/json" },
+    body: params
+  });
+  return response;
+}
+
+module.exports.addUrlAttachment = async (cardId, url) => {
+  const params = new URLSearchParams();
+  params.append("key", process.env.TRELLO_API_KEY);
+  params.append("token", process.env.TRELLO_API_TOKEN);
+  params.append("url", url);
+
+  const response = await fetch(`https://api.trello.com/1/cards/${cardId}/attachments`, {
+    method: "post",
     headers: { Accept: "application/json" },
     body: params
   });

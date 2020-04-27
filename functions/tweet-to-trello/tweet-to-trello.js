@@ -19,32 +19,9 @@ const raiseError = (message) => {
   notifyFailure(message);
 };
 
-/*
-const sendExtraRequest = () => {
-  const { URLSearchParams } = require("url");
-  const params = new URLSearchParams();
-  console.log('trying to send...')
-  console.log(params)
-  const fetch = require("node-fetch");
-  const promise = fetch("http://localhost:8888/.netlify/functions/tweet-to-trello", {
-    method: "POST",
-    headers: {
-      'x-extrarequest': '1',
-      'x-bodyformat': 'JSON',
-      Accept: "application/json"
-    },
-    body: JSON.stringify({
-      "secret": process.env.TWEET_TO_TRELLO_SECRET,
-      "url": 'https://www.w3schools.com/js/js_switch.asp'
-    })
-  });
-  return promise;
-}
-*/
-
-const sendFetchPageText = async (cardId, path) => {
-  const url = `${process.env.URL}${path}`
-  console.log('sendFetchPageTo:', url)
+const sendFetchPageTextRequest = async (cardId, path) => {
+  const url = `${process.env.URL}${path}`;
+  console.log("sending fetchPageText request to:", url);
   return fetch(url, {
     method: "post",
     headers: {
@@ -53,7 +30,23 @@ const sendFetchPageText = async (cardId, path) => {
     },
     body: JSON.stringify({
       secret: process.env.TWEET_TO_TRELLO_SECRET,
-      cardId
+      cardId,
+    }),
+  });
+};
+
+const sendExpandUrlRequest = async (cardId, path) => {
+  const url = `${process.env.URL}${path}`;
+  console.log("sending expandUrl request to:", url);
+  return fetch(url, {
+    method: "post",
+    headers: {
+      "x-strategy": "expandUrl",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      secret: process.env.TWEET_TO_TRELLO_SECRET,
+      cardId,
     }),
   });
 };
@@ -74,12 +67,16 @@ exports.handler = async (event) => {
   switch (strategy) {
     case "bookmark":
       console.log("==== strategy: bookmark ====");
+      Promise.all;
       const resp = await require("./handleBookmark")({ event });
-      await sendFetchPageText(resp.body.cardId, event.path);
+      await Promise.all([
+        sendFetchPageTextRequest(resp.body.cardId, event.path),
+        sendExpandUrlRequest(resp.body.cardId, event.path)
+      ]);
       break;
     case "expandUrl":
       console.log("==== strategy: expandUrl ====");
-      //return handleExpandUrl();
+      await require("./handleExpandUrl")({ event });
       break;
     case "fetchPageText":
       console.log("==== strategy: fetchPageText ====");
@@ -91,7 +88,6 @@ exports.handler = async (event) => {
 
   return {
     statusCode: 200,
-    body: 'done'
+    body: "done",
   };
-
 };

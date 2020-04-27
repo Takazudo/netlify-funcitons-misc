@@ -46,24 +46,6 @@ module.exports = async ({event}) => {
     }
   }
 
-  // == expand url ==
-
-  let expandedUrl
-
-  try {
-    let gotResult = false
-    setTimeout(() => {
-      if(gotResult) return
-      expandedUrl = urlSource
-      throw new Error('oops tall timeout')
-    }, 5000)
-    expandedUrl = await unshortenUrl(urlSource)
-    gotResult = true
-  } catch (error) {
-    raiseError('ERR: tall failed. Anyway keep going.')
-    expandedUrl = urlSource
-  }
-
   // == fetch formatted page text ==
 
   try {
@@ -72,13 +54,13 @@ module.exports = async ({event}) => {
       desc: tweetText,
       fromTweet: bodyFormat === 'TEXT',
       fromIos: bodyFormat === 'JSON',
-      urlSource: expandedUrl
+      urlSource: urlSource
     })
     const response = await createTrelloCard(params)
 
     // something wrong
     if (!response.ok) {
-      raiseError(`ERR: trello api says response.ok is false ${expandedUrl}`)
+      raiseError(`ERR: trello api says response.ok is false ${urlSource}`)
       // NOT res.status >= 200 && res.status < 300
       const data = await response.json()
       //console.log(data)
@@ -102,7 +84,7 @@ module.exports = async ({event}) => {
     }
   } catch (err) {
     // something wrong
-    raiseError(`ERR: request failed on creating card ${expandedUrl}`)
+    raiseError(`ERR: request failed on creating card ${urlSource}`)
     console.log(err.message)
     console.log(err)
     return {
