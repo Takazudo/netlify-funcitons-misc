@@ -9,15 +9,15 @@ const raiseError = (message) => {
   notifyFailure(message);
 };
 
-exports.handler = async (event, context, callback) => {
+exports.handler = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = false
 
   if (event.httpMethod !== "POST") {
     raiseError("ERR: method is not post");
-    callback(null, {
+    return {
       statusCode: 400,
       body: "Must POST to this function",
-    });
+    }
   }
 
   const strategy = event.headers["x-strategy"] || "bookmark";
