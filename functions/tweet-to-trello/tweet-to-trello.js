@@ -52,7 +52,6 @@ const sendExpandUrlRequest = async (cardId, path) => {
 };
 
 exports.handler = async (event) => {
-
   if (event.httpMethod !== "POST") {
     raiseError("ERR: method is not post");
     return {
@@ -63,31 +62,38 @@ exports.handler = async (event) => {
 
   const strategy = event.headers["x-strategy"] || "bookmark";
 
-  console.log(`==== ${strategy} ====`)
+  console.log(`==== ${strategy} ====`);
+
+  const okRespnose = {
+    statusCode: 200,
+    body: "done",
+  };
 
   switch (strategy) {
     case "bookmark":
       Promise.all;
       const cardId = await require("./handleBookmark")({ event });
-      await Promise.all([
+      return Promise.all([
         sendFetchPageTextRequest(cardId, event.path),
-        sendExpandUrlRequest(cardId, event.path)
-      ]);
+        sendExpandUrlRequest(cardId, event.path),
+      ]).then(() => {
+        console.log(`==== /${strategy} ====`);
+        return okRespnose;
+      });
       break;
     case "expandUrl":
-      await require("./handleExpandUrl")({ event });
+      return require("./handleExpandUrl")({ event }).then(() => {
+        console.log(`==== /${strategy} ====`);
+        return okRespnose;
+      });
       break;
     case "fetchPageText":
-      await require("./handleFetchPageText")({ event });
+      return require("./handleFetchPageText")({ event }).then(() => {
+        console.log(`==== /${strategy} ====`);
+        return okRespnose;
+      });
       break;
     default:
       break;
   }
-
-  console.log(`==== /${strategy} ====`)
-
-  return {
-    statusCode: 200,
-    body: "done",
-  };
 };
