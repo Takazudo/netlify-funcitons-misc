@@ -8,6 +8,8 @@ const raiseError = (message) => {
 };
 
 exports.handler = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false
+
   if (event.httpMethod !== "POST") {
     raiseError("ERR: method is not post");
     callback(null, {
