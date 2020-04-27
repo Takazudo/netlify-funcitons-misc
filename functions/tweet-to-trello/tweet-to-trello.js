@@ -46,7 +46,7 @@ const sendFetchPageText = async (cardId, path) => {
   const url = `${process.env.URL}${path}`
   console.log('sendFetchPageTo:', url)
   return fetch(url, {
-    method: "POST",
+    method: "post",
     headers: {
       "x-strategy": "fetchPageText",
       Accept: "application/json",
