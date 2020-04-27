@@ -71,7 +71,6 @@ module.exports = async ({event}) => {
 
   try {
     const resp = await updateCardDesc(cardId, updartedDesc)
-    const data = await resp.json()
   } catch (err) {
     raiseError(`ERR: udpate card failed. ${url}`)
     console.log(err)
@@ -79,11 +78,6 @@ module.exports = async ({event}) => {
       statusCode: 500,
       body: 'failed'
     }
-  }
-
-  return {
-    statusCode: 200,
-    body: 'done'
   }
 
 }

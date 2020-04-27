@@ -83,7 +83,7 @@ exports.handler = async (event) => {
       break;
     case "fetchPageText":
       console.log("==== strategy: fetchPageText ====");
-      require("./handleFetchPageText")({ event });
+      await require("./handleFetchPageText")({ event });
       break;
     default:
       break;
