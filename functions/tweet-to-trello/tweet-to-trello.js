@@ -1,6 +1,6 @@
 const { sendFetchPageTextRequest, sendExpandUrlRequest } = require("./utils");
 const fetch = require("node-fetch");
-const { notifyFailure } = require("./mail-sender");
+const { notifyFailure, notifyOk } = require("./mail-sender");
 
 const raiseError = (message) => {
   console.log(message);
@@ -30,7 +30,8 @@ exports.handler = (event, context, callback) => {
   switch (strategy) {
     case "bookmark":
       require("./handleBookmark")({ event })
-        .then((cardId) => {
+        .then(({ cardId, cardName }) => {
+          notifyOk(cardName)
           return Promise.all([
             sendFetchPageTextRequest(cardId, event.path),
             sendExpandUrlRequest(cardId, event.path),

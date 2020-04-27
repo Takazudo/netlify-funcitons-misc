@@ -68,7 +68,10 @@ module.exports = async ({ event }) => {
     //if(!isExtraRequest) sendExtraRequest()
 
     // succeeded!
-    return data.id;
+    return {
+      cardId: data.id,
+      cardName: data.name
+    };
   } catch (err) {
     // something wrong
     raiseError(`ERR: request failed on creating card ${urlSource}`);
