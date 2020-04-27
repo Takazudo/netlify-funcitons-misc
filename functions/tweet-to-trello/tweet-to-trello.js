@@ -52,7 +52,6 @@ const sendExpandUrlRequest = async (cardId, path) => {
 };
 
 exports.handler = async (event) => {
-  console.log("=== request accepted ===");
 
   if (event.httpMethod !== "POST") {
     raiseError("ERR: method is not post");
@@ -64,9 +63,10 @@ exports.handler = async (event) => {
 
   const strategy = event.headers["x-strategy"] || "bookmark";
 
+  console.log(`==== ${strategy} ====`)
+
   switch (strategy) {
     case "bookmark":
-      console.log("==== strategy: bookmark ====");
       Promise.all;
       const resp = await require("./handleBookmark")({ event });
       await Promise.all([
@@ -75,16 +75,16 @@ exports.handler = async (event) => {
       ]);
       break;
     case "expandUrl":
-      console.log("==== strategy: expandUrl ====");
       await require("./handleExpandUrl")({ event });
       break;
     case "fetchPageText":
-      console.log("==== strategy: fetchPageText ====");
       await require("./handleFetchPageText")({ event });
       break;
     default:
       break;
   }
+
+  console.log(`==== /${strategy} ====`)
 
   return {
     statusCode: 200,
