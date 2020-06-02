@@ -1,9 +1,6 @@
 [build]
   publish = "dist/"
-
-  # Default build command.
-  #command = "echo 'default context'"
-
+  command = "cd functions/tweet-to-trello && npm instal"
   functions = "functions/"
 
 [[headers]]
