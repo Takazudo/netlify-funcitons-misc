@@ -1,22 +1,19 @@
-const fetch = require("node-fetch");
-const parseHtml = require("node-html-parser").parse;
-//const fn1 = require("../utils/test.js").fn1;
+const tall = require("tall").tall;
 
 const raiseError = (message) => {
   console.error(message);
 };
 
-const convertHtmlToText = (html) => {
-  const options = {
-    script: false,
-    style: false,
-    pre: true,
-    comment: false,
-  };
-  // parsed should be a formatted DOM element that node-html-parser generates
-  const parsed = parseHtml(html, options);
-  // we don't need many line breaks
-  return parsed.text.replace(/\n\s+/g, "\n").replace(/\n\n\n+/g, "\n\n");
+const unshortenUrl = async (url) => {
+  const isYoutube = /youtube/.test(url);
+  // I'm not sure but youtube always fails
+  if(isYoutube) return url;
+
+  try {
+    return await tall(url);
+  } catch (error) {
+    throw new Error();
+  }
 };
 
 exports.handler = async (event) => {
@@ -48,21 +45,14 @@ exports.handler = async (event) => {
   }
 
   try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      return {
-        statusCode: 400,
-        body: "page fetching failed",
-      };
-    }
-    const html = await response.text();
-    const text = convertHtmlToText(html);
+    const result = await unshortenUrl(url);
     return {
       statusCode: 200,
       'Content-Type': 'application/json; charset=UTF-8',
       body: JSON.stringify({
-        text: text.trim(),
-      }),
+        original: url,
+        result
+      })
     };
   } catch (err) {
     raiseError(`ERR: fetching page failed. ${url}`);
