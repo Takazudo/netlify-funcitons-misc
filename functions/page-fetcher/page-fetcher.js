@@ -1,5 +1,6 @@
 const fetch = require("node-fetch");
 const parseHtml = require("node-html-parser").parse;
+const fn1 = require("../tweet-to-trello/test.js").fn1;
 
 const raiseError = (message) => {
   console.error(message);
@@ -58,7 +59,9 @@ exports.handler = async (event) => {
     const text = convertHtmlToText(html);
     return {
       statusCode: 200,
+      'Content-Type': 'application/json; charset=UTF-8',
       body: JSON.stringify({
+        asdf: fn1(),
         text: text.trim(),
       }),
     };
