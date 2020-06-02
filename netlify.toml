@@ -1,10 +1,7 @@
 [build]
   publish = "dist/"
-
-  # Default build command.
-  #command = "build started"
-
   functions = "functions/"
+  command = "echo 'build started'"
 
 [[headers]]
   # Define which paths this specific [[headers]] block will cover.
