@@ -1,6 +1,5 @@
 [build]
   publish = "dist/"
-  command = "cd functions/tweet-to-trello && npm instal"
   functions = "functions/"
 
 [[headers]]
