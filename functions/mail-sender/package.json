@@ -1,0 +1,14 @@
+{
+  "name": "mail-sender",
+  "version": "1.0.0",
+  "description": "mail sender",
+  "main": "mail-sender.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Takazudo",
+  "license": "MIT",
+  "dependencies": {
+    "nodemailer": "^6.4.8"
+  }
+}
