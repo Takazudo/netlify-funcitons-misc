@@ -2,7 +2,7 @@
   publish = "dist/"
 
   # Default build command.
-  #command = "echo 'default context'"
+  command = "build started"
 
   functions = "functions/"
 
