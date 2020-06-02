@@ -1,6 +1,7 @@
 const nodemailer = require("nodemailer");
+
 const raiseError = (message) => {
-  console.log(message);
+  console.error(message);
 };
 
 exports.handler = (event, context) => {
