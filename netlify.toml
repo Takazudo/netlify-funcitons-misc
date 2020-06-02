@@ -2,7 +2,7 @@
   publish = "dist/"
 
   # Default build command.
-  command = "build started"
+  #command = "build started"
 
   functions = "functions/"
 
