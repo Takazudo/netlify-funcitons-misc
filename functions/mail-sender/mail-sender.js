@@ -4,26 +4,27 @@ const raiseError = (message) => {
   console.error(message);
 };
 
-exports.handler = (event, context) => {
+exports.handler = (event) => {
   // check method
   if (event.httpMethod !== "POST") {
     raiseError("ERR: method is not post");
     return {
       statusCode: 400,
       body: "Must POST to this function",
-    }
+    };
   }
 
-  const body = JSON.parse(event.body);
-
   // check secret
-  if(body.appSecret !== process.env.APP_SECRET) {
+  const appSecret = event.headers["x-appsecret"];
+  if (appSecret !== process.env.APP_SECRET) {
     raiseError("ERR: appSecret invalid");
     return {
       statusCode: 400,
       body: "appSecret invalid",
-    }
+    };
   }
+
+  const body = JSON.parse(event.body);
 
   // send mail
   const transporter = nodemailer.createTransport({
@@ -56,6 +57,5 @@ exports.handler = (event, context) => {
   return {
     statusCode: 200,
     body: "mail sent",
-  }
+  };
 };
-
