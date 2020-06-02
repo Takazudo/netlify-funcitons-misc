@@ -16,6 +16,7 @@
     "node-html-parser": "^1.2.12",
     "nodemailer": "^6.4.8",
     "sendmail": "^1.6.1",
-    "tall": "^3.0.0"
+    "tall": "^3.0.0",
+    "webpack": "^4.43.0"
   }
 }
