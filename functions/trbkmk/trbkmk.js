@@ -29,6 +29,8 @@ exports.handler = (event) => {
     }
   }
 
+  console.log(process.env);
+
   return {
     statusCode: 400,
     body: JSON.stringify(process.env)
