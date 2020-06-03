@@ -19,10 +19,10 @@ const unshortenUrl = async (url) => {
 exports.handler = async (event) => {
   // check method
   if (event.httpMethod !== "GET") {
-    raiseError("ERR: method is not post");
+    raiseError("ERR: method is not get");
     return {
       statusCode: 400,
-      body: "Must POST to this function",
+      body: "Must GET to this function",
     };
   }
 
