@@ -13,10 +13,10 @@ const sendRequest = async ({ idCard, desc }) => {
   const response = await fetch(`https://api.trello.com/1/cards/${idCard}`, {
     method: "put",
     headers: { Accept: "application/json" },
-    body: params
+    body: params,
   });
   return response;
-}
+};
 
 exports.handler = async (event) => {
   // check method
@@ -38,7 +38,7 @@ exports.handler = async (event) => {
     };
   }
 
-  const {idCard, desc } = JSON.parse(event.body);
+  const { idCard, desc } = JSON.parse(event.body);
 
   // check params
   if (!idCard) {
