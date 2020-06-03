@@ -1,7 +1,7 @@
 const fetch = require("node-fetch");
 
 const URL = {
-  CREATE_CARD: `${process.env.URL}/.netlify/functions/create-trello-bookmark-card`,
+  CREATE_CARD: `${process.env.URL}/.netlify/functions/trello-create-bookmark-card`,
   UPDATE_CARD_DESC: `${process.env.URL}/.netlify/functions/update-trello-card-desc`,
   UPDATE_ATTACHED_URL: `${process.env.URL}/.netlify/functions/update-trello-card-attached-url`,
 };
