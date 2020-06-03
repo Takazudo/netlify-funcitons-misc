@@ -5,6 +5,8 @@ const DESC_LIMIT_TEXT_LENGTH = 16384;
 
 const baseUrl = `${process.env.URL}/.netlify/functions`;
 
+console.log(process.env);
+
 const URL = {
   FETCH_CARD: `${baseUrl}/trello-fetch-card`,
   FETCH_PAGE_TEXT: `${baseUrl}/fetch-page-text`,
