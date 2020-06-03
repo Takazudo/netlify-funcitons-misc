@@ -3,16 +3,6 @@ const fetch = require("node-fetch");
 // Trello card's desc can contain 16384 chars
 const DESC_LIMIT_TEXT_LENGTH = 16384;
 
-const baseUrl = `${process.env.URL}/.netlify/functions`;
-
-console.log(process.env);
-
-const URL = {
-  FETCH_CARD: `${baseUrl}/trello-fetch-card`,
-  FETCH_PAGE_TEXT: `${baseUrl}/fetch-page-text`,
-  UPDATE_DESC: `${baseUrl}/trello-update-card-desc`,
-};
-
 const raiseError = (message) => {
   console.error(message);
 };
@@ -35,6 +25,14 @@ exports.handler = async (event) => {
       body: "Must POST to this function",
     };
   }
+  const envUrl = event.headers["x-debug-env-url"] || process.env.URL;
+  let baseUrl = `${envUrl}/.netlify/functions`;
+
+  const URL = {
+    FETCH_CARD: `${baseUrl}/trello-fetch-card`,
+    FETCH_PAGE_TEXT: `${baseUrl}/fetch-page-text`,
+    UPDATE_DESC: `${baseUrl}/trello-update-card-desc`,
+  };
 
   // check secret
   const appSecret = event.headers["x-appsecret"];
