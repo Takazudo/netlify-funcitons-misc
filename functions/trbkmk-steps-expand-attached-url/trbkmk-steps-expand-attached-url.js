@@ -66,7 +66,7 @@ exports.handler = async (event) => {
   const unshortenedUrl = (await unshortenUrl(url)).result;
 
   // if same, return
-  if(url === unshortenedUrl) {
+  if (url === unshortenedUrl) {
     return {
       statusCode: 400,
       body: JSON.stringify({
@@ -82,8 +82,8 @@ exports.handler = async (event) => {
   return {
     statusCode: 400,
     body: JSON.stringify({
-        result: true,
-        attached: true,
-      }),
+      result: true,
+      attached: true,
+    }),
   };
 };
