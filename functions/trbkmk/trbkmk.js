@@ -1,4 +1,5 @@
 const fetch = require("node-fetch");
+const { wait } = require("../utils");
 
 const raiseError = (message) => {
   console.error(message);
@@ -20,6 +21,7 @@ exports.handler = async (event) => {
     CREATE_CARD: `${baseUrl}/trello-create-bookmark-card`,
     UPDATE_CARD_DESC: `${baseUrl}/trbkmk-steps-update-card-desc`,
     EXPAND_ATTACHED_URL: `${baseUrl}/trbkmk-steps-expand-attached-url`,
+    SEND_MAIL: `${baseUrl}/send-mail-notification`,
   };
 
   const commonRequestHeaders = {
@@ -68,16 +70,34 @@ exports.handler = async (event) => {
     return response.json();
   };
 
+  const sendMail = async (cardName, url) => {
+    const response = await fetch(URL.SEND_MAIL, {
+      method: "post",
+      headers: commonRequestHeaders,
+      body: JSON.stringify({
+        subject: `⭐️ ${cardName}`,
+        text: url,
+      }),
+    });
+    return response.json();
+  };
+
   const { url, targetList } = JSON.parse(event.body);
   const { cardData } = await sendCardCreationRequest(url, targetList);
   const idCard = cardData.id;
+
+  // notify that we made a card via mail
+  sendMail(cardData.name, url);
+
+  // invoke extras
   updateCardDesc(idCard);
   expandAttachedUrl(idCard, url);
-  await new Promise(resolve => setTimeout(resolve, 500))
+
+  // we need a tiny delay to invoke above extras
+  await wait(500);
+
   return {
     statusCode: 400,
-    body: JSON.stringify({
-      result: true,
-    }),
+    body: JSON.stringify({ result: true }),
   };
 };

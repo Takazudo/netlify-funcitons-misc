@@ -39,7 +39,7 @@ exports.handler = (event) => {
 
   transporter.sendMail(
     {
-      from: `"TrBkmk" <${process.env.GMAIL_SENDER_ADDRESS}>`,
+      from: `"TRBKMK" <${process.env.GMAIL_SENDER_ADDRESS}>`,
       to: process.env.GMAIL_SENDER_ADDRESS,
       subject: body.subject,
       text: body.text,
@@ -56,6 +56,6 @@ exports.handler = (event) => {
 
   return {
     statusCode: 200,
-    body: "mail sent",
+    body: JSON.stringify({ result: true }),
   };
 };
