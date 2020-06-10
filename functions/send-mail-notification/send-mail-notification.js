@@ -37,7 +37,7 @@ exports.handler = catchErrors(async (event) => {
   transporter.sendMail(
     {
       from: `"TRBKMK" <${process.env.GMAIL_SENDER_ADDRESS}>`,
-      to: process.env.GMAIL_SENDER_ADDRESS,
+      to: process.env.MAIL_RECEIVER_ADDRESS,
       subject: body.subject,
       text: body.text,
     },
