@@ -1,16 +1,46 @@
-const Sentry = require('@sentry/node');
+const Sentry = require("@sentry/node");
 const fetch = require("node-fetch");
 const { wait } = require("../utils");
 
-const raiseError = (message) => {
-  console.error(message);
-};
+const { SENTRY_DSN } = process.env;
+let sentryInitialized = false;
 
-exports.handler = async (event) => {
-  Sentry.init({ dsn: process.env.SENTRY_DSN });
-  myUndefinedFunction();
+function initSentry() {
+  if (SENTRY_DSN) {
+    Sentry.init({ dsn: SENTRY_DSN });
+    sentryInitialized = true;
+  }
+}
+
+async function reportError(error) {
+  console.warn(error);
+  if (!sentryInitialized) return;
+  if (typeof error === 'string') {
+      Sentry.captureMessage(error);
+  } else {
+      Sentry.captureException(error);
+  }
+  await Sentry.flush();
+}
+
+function catchErrors(handler) {
+  return async function(event, context) {
+    context.callbackWaitsForEmptyEventLoop = false;
+    try {
+      return await handler.call(this, ...arguments);
+    } catch(e) {
+      // This catches both sync errors & promise
+      // rejections, because we 'await' on the handler
+      await reportError(e);
+      throw e;
+    }
+  };
+}
+
+exports.handler = catchErrors(async (event) => {
+  initSentry();
+  //context.callbackWaitsForEmptyEventLoop = false;
   if (event.httpMethod !== "POST") {
-    raiseError("ERR: method is not post");
     return {
       statusCode: 400,
       body: "Must POST to this function",
@@ -46,7 +76,6 @@ exports.handler = async (event) => {
       body: JSON.stringify(requestBody),
     });
     if (!response.ok) {
-      raiseError(`error on card creation`);
       return {
         statusCode: response.status,
         body: response.statusText,
@@ -56,7 +85,6 @@ exports.handler = async (event) => {
   };
 
   const updateCardDesc = async (idCard) => {
-    // TODO: handle error
     //console.log(`idCard: ${idCard}`);
     const response = await fetch(URL.UPDATE_CARD_DESC, {
       method: "post",
@@ -67,7 +95,6 @@ exports.handler = async (event) => {
   };
 
   const expandAttachedUrl = async (idCard, url) => {
-    // TODO: handle error
     //console.log(`idCard: ${idCard}`);
     const response = await fetch(URL.EXPAND_ATTACHED_URL, {
       method: "post",
@@ -107,4 +134,4 @@ exports.handler = async (event) => {
     statusCode: 400,
     body: JSON.stringify({ result: true }),
   };
-};
+});
