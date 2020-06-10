@@ -1,13 +1,11 @@
 const nodemailer = require("nodemailer");
+const { initSentry, catchErrors } = require("../utils");
 
-const raiseError = (message) => {
-  console.error(message);
-};
+exports.handler = catchErrors(async (event) => {
+  initSentry();
 
-exports.handler = (event) => {
   // check method
   if (event.httpMethod !== "POST") {
-    raiseError("ERR: method is not post");
     return {
       statusCode: 400,
       body: "Must POST to this function",
@@ -17,7 +15,6 @@ exports.handler = (event) => {
   // check secret
   const appSecret = event.headers["x-appsecret"];
   if (appSecret !== process.env.APP_SECRET) {
-    raiseError("ERR: appSecret invalid");
     return {
       statusCode: 400,
       body: "appSecret invalid",
@@ -46,7 +43,6 @@ exports.handler = (event) => {
     },
     function (error, info) {
       if (error) {
-        raiseError("ERR: mail sent falled");
         console.log(error);
       } else {
         console.log("mail sent seems ok");
@@ -58,4 +54,4 @@ exports.handler = (event) => {
     statusCode: 200,
     body: JSON.stringify({ result: true }),
   };
-};
+});
