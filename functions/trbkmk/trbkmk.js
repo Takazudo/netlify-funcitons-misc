@@ -73,6 +73,7 @@ exports.handler = async (event) => {
   const idCard = cardData.id;
   updateCardDesc(idCard);
   expandAttachedUrl(idCard, url);
+  await new Promise(resolve => setTimeout(resolve, 500))
   return {
     statusCode: 400,
     body: JSON.stringify({
