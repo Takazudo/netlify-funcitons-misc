@@ -1,7 +1,7 @@
 [build]
   publish = "dist/"
-  command = "cd functions/tweet-to-trello && npm install"
   functions = "functions/"
+  command = "echo 'build started'"
 
 [[headers]]
   # Define which paths this specific [[headers]] block will cover.
