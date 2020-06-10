@@ -92,7 +92,7 @@ exports.handler = catchErrors(async (event) => {
   expandAttachedUrl(idCard, url);
 
   // we need a tiny delay to invoke above extras
-  await wait(500);
+  await wait(2000);
 
   return {
     statusCode: 400,

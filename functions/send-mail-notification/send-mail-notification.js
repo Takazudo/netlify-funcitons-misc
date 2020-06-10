@@ -1,5 +1,5 @@
 const nodemailer = require("nodemailer");
-const { initSentry, catchErrors } = require("../utils");
+const { wait, initSentry, catchErrors } = require("../utils");
 
 exports.handler = catchErrors(async (event) => {
   initSentry();
@@ -49,6 +49,8 @@ exports.handler = catchErrors(async (event) => {
       }
     }
   );
+
+  await wait(1000);
 
   return {
     statusCode: 200,
