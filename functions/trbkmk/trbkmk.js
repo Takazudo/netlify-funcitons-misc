@@ -1,3 +1,4 @@
+const Sentry = require('@sentry/node');
 const fetch = require("node-fetch");
 const { wait } = require("../utils");
 
@@ -6,6 +7,8 @@ const raiseError = (message) => {
 };
 
 exports.handler = async (event) => {
+  Sentry.init({ dsn: process.env.SENTRY_DSN });
+  myUndefinedFunction();
   if (event.httpMethod !== "POST") {
     raiseError("ERR: method is not post");
     return {
