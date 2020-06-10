@@ -32,11 +32,15 @@ exports.handler = async (event) => {
     commonRequestHeaders["x-debug-env-url"] = envUrl;
   }
 
-  const sendCardCreationRequest = async (url, targetList) => {
+  const sendCardCreationRequest = async (url, targetList, desc) => {
+    const requestBody = { url, targetList };
+    if (desc) {
+      requestBody.desc = desc;
+    }
     const response = await fetch(URL.CREATE_CARD, {
       method: "post",
       headers: commonRequestHeaders,
-      body: JSON.stringify({ url, targetList }),
+      body: JSON.stringify(requestBody),
     });
     if (!response.ok) {
       raiseError(`error on card creation`);
@@ -82,8 +86,8 @@ exports.handler = async (event) => {
     return response.json();
   };
 
-  const { url, targetList } = JSON.parse(event.body);
-  const { cardData } = await sendCardCreationRequest(url, targetList);
+  const { url, targetList, desc } = JSON.parse(event.body);
+  const { cardData } = await sendCardCreationRequest(url, targetList, desc);
   const idCard = cardData.id;
 
   // notify that we made a card via mail

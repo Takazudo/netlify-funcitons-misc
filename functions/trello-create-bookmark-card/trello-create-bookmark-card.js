@@ -4,7 +4,7 @@ const raiseError = (message) => {
   console.error(message);
 };
 
-const createParams = ({ url, idList }) => {
+const createParams = ({ url, idList, desc }) => {
   const params = new URLSearchParams();
   const { TRELLO_API_KEY: key, TRELLO_API_TOKEN: token } = process.env;
   params.append("pos", "top");
@@ -12,6 +12,9 @@ const createParams = ({ url, idList }) => {
   params.append("key", key);
   params.append("token", token);
   params.append("urlSource", url);
+  if(desc) {
+    params.append("desc", desc);
+  }
   return params;
 };
 
@@ -54,7 +57,7 @@ exports.handler = async (event) => {
     };
   }
 
-  const { url, targetList } = JSON.parse(event.body);
+  const { url, targetList, desc } = JSON.parse(event.body);
 
   // check params
   if (!url) {
@@ -63,7 +66,7 @@ exports.handler = async (event) => {
   }
 
   const idList = getTargetListId(targetList || "DEFAULT");
-  const params = createParams({ url, idList });
+  const params = createParams({ url, idList, desc });
   const response = await createCard(params);
 
   // something wrong
