@@ -45,6 +45,7 @@ exports.handler = async (event) => {
     body: JSON.stringify({
       url: tweetUrl,
       desc: tweetText,
+      targetList: "TWEET",
     }),
   });
   const result = await response.json();
