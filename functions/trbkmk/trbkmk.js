@@ -80,6 +80,9 @@ exports.handler = catchErrors(async (event) => {
     return response.json();
   };
 
+  // debug
+  console.log(event.body);
+
   const { url, targetList, desc } = JSON.parse(event.body);
   const { cardData } = await sendCardCreationRequest(url, targetList, desc);
   const idCard = cardData.id;

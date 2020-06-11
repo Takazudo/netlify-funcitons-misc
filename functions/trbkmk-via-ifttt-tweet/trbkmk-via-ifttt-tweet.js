@@ -15,7 +15,6 @@ const extractDataFromBody = (requestBody) => {
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
-    raiseError("ERR: method is not post");
     return {
       statusCode: 400,
       body: "Must POST to this function",
@@ -38,6 +37,13 @@ exports.handler = async (event) => {
   if (event.headers["x-debug-env-url"]) {
     commonRequestHeaders["x-debug-env-url"] = envUrl;
   }
+
+  // debug
+  console.log({
+    url: tweetUrl,
+    desc: tweetText,
+    targetList: "TWEET",
+  });
 
   const response = await fetch(URL.TRBKMK, {
     method: "post",
