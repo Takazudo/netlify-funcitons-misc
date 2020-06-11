@@ -38,13 +38,6 @@ exports.handler = async (event) => {
     commonRequestHeaders["x-debug-env-url"] = envUrl;
   }
 
-  // debug
-  console.log({
-    url: tweetUrl,
-    desc: tweetText,
-    targetList: "TWEET",
-  });
-
   const response = await fetch(URL.TRBKMK, {
     method: "post",
     headers: commonRequestHeaders,
