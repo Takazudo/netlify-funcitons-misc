@@ -71,6 +71,15 @@ const createCommonRequestHeaders = (event) => {
   return headers;
 };
 
+const isValidUser = (event) => {
+  const appSecret = event.headers["x-appsecret"];
+  if (appSecret === process.env.APP_SECRET) {
+    return true;
+  }
+  reportError(new Error("invalid appsecret"));
+  return false;
+};
+
 module.exports = {
   wait,
   reportError,
@@ -80,4 +89,5 @@ module.exports = {
   createBaseUrl,
   createCommonRequestHeaders,
   commonSuccessResponse,
+  isValidUser,
 };
