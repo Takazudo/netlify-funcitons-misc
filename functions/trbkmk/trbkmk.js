@@ -6,10 +6,15 @@ const {
   createBaseUrl,
   commonSuccessResponse,
   createCommonRequestHeaders,
+  commonErrorResponse,
+  isValidUser,
 } = require("../utils");
 
 exports.handler = catchErrors(async (event) => {
   initSentry();
+
+  // check secret
+  if (!isValidUser(event)) return commonErrorResponse;
 
   const baseUrl = createBaseUrl(event);
   const api = {
