@@ -1,25 +1,19 @@
 const nodemailer = require("nodemailer");
-const { wait, initSentry, catchErrors } = require("../utils");
+const {
+  wait,
+  initSentry,
+  catchErrors,
+  commonErrorResponse,
+  commonSuccessResponse,
+  isValidUser,
+  reportError,
+} = require("../utils");
 
 exports.handler = catchErrors(async (event) => {
   initSentry();
 
-  // check method
-  if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 400,
-      body: "Must POST to this function",
-    };
-  }
-
   // check secret
-  const appSecret = event.headers["x-appsecret"];
-  if (appSecret !== process.env.APP_SECRET) {
-    return {
-      statusCode: 400,
-      body: "appSecret invalid",
-    };
-  }
+  if (!isValidUser(event)) return commonErrorResponse;
 
   const body = JSON.parse(event.body);
 
@@ -43,17 +37,15 @@ exports.handler = catchErrors(async (event) => {
     },
     function (error, info) {
       if (error) {
-        console.log(error);
+        reportError(error);
       } else {
         console.log("mail sent seems ok");
       }
     }
   );
 
+  // we need a tiny delay to ensure the mail was sent
   await wait(1000);
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ result: true }),
-  };
+  return commonSuccessResponse;
 });
