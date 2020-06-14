@@ -1,83 +1,69 @@
 const fetch = require("node-fetch");
-const { wait, initSentry, catchErrors } = require("../utils");
+const {
+  wait,
+  initSentry,
+  catchErrors,
+  createBaseUrl,
+  commonSuccessResponse,
+  createCommonRequestHeaders,
+} = require("../utils");
 
 exports.handler = catchErrors(async (event) => {
   initSentry();
 
-  if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 400,
-      body: "Must POST to this function",
-    };
-  }
-
-  const envUrl = event.headers["x-debug-env-url"] || process.env.URL;
-  let baseUrl = `${envUrl}/.netlify/functions`;
-
-  const URL = {
-    CREATE_CARD: `${baseUrl}/trello-create-bookmark-card`,
-    UPDATE_CARD_DESC: `${baseUrl}/trbkmk-steps-update-card-desc`,
-    EXPAND_ATTACHED_URL: `${baseUrl}/trbkmk-steps-expand-attached-url`,
-    SEND_MAIL: `${baseUrl}/send-mail-notification`,
+  const baseUrl = createBaseUrl(event);
+  const api = {
+    createCard: `${baseUrl}/trello-create-bookmark-card`,
+    updateCardDesc: `${baseUrl}/trbkmk-steps-update-card-desc`,
+    expandAttachedUrl: `${baseUrl}/trbkmk-steps-expand-attached-url`,
+    sendMail: `${baseUrl}/send-mail-notification`,
   };
 
-  const commonRequestHeaders = {
-    "x-appsecret": event.headers["x-appsecret"],
-    Accept: "application/json",
-  };
-  if (event.headers["x-debug-env-url"]) {
-    commonRequestHeaders["x-debug-env-url"] = envUrl;
-  }
+  const headers = createCommonRequestHeaders(event);
 
   const sendCardCreationRequest = async (url, targetList, desc) => {
     const requestBody = { url, targetList };
     if (desc) {
       requestBody.desc = desc;
     }
-    const response = await fetch(URL.CREATE_CARD, {
+    const response = await fetch(api.createCard, {
       method: "post",
-      headers: commonRequestHeaders,
+      headers,
       body: JSON.stringify(requestBody),
     });
-    if (!response.ok) {
-      return {
-        statusCode: response.status,
-        body: response.statusText,
-      };
-    }
     return await response.json();
   };
 
   const updateCardDesc = async (idCard) => {
     //console.log(`idCard: ${idCard}`);
-    const response = await fetch(URL.UPDATE_CARD_DESC, {
+    const response = await fetch(api.updateCardDesc, {
       method: "post",
-      headers: commonRequestHeaders,
+      headers,
       body: JSON.stringify({ idCard }),
     });
-    return response.json();
+    return await response.json();
   };
 
   const expandAttachedUrl = async (idCard, url) => {
     //console.log(`idCard: ${idCard}`);
-    const response = await fetch(URL.EXPAND_ATTACHED_URL, {
+    const response = await fetch(api.expandAttachedUrl, {
       method: "post",
-      headers: commonRequestHeaders,
+      headers,
       body: JSON.stringify({ idCard, url }),
     });
-    return response.json();
+    return await response.json();
   };
 
   const sendMail = async (cardName, url) => {
-    const response = await fetch(URL.SEND_MAIL, {
+    const response = await fetch(api.sendMail, {
       method: "post",
-      headers: commonRequestHeaders,
+      headers,
       body: JSON.stringify({
         subject: `⭐️ ${cardName}`,
         text: url,
       }),
     });
-    return response.json();
+    return await response.json();
   };
 
   const { url, targetList, desc } = JSON.parse(event.body);
@@ -94,8 +80,5 @@ exports.handler = catchErrors(async (event) => {
   // we need a tiny delay to invoke above extras
   await wait(2000);
 
-  return {
-    statusCode: 400,
-    body: JSON.stringify({ result: true }),
-  };
+  return commonSuccessResponse;
 });
