@@ -1,8 +1,11 @@
 const fetch = require("node-fetch");
-
-const raiseError = (message) => {
-  console.error(message);
-};
+const {
+  initSentry,
+  catchErrors,
+  commonSuccessResponse,
+  commonErrorResponse,
+  isValidUser,
+} = require("../utils");
 
 const createParams = (url) => {
   const params = new URLSearchParams();
@@ -25,52 +28,26 @@ const attachUrlToCard = async (params, idCard) => {
   return response;
 };
 
-exports.handler = async (event) => {
-  // check method
-  if (event.httpMethod !== "POST") {
-    raiseError("ERR: method is not post");
-    return {
-      statusCode: 400,
-      body: "Must POST to this function",
-    };
-  }
+exports.handler = catchErrors(async (event) => {
+  initSentry();
 
   // check secret
-  const appSecret = event.headers["x-appsecret"];
-  if (appSecret !== process.env.APP_SECRET) {
-    raiseError("ERR: appSecret invalid");
-    return {
-      statusCode: 400,
-      body: "appSecret invalid",
-    };
-  }
+  if (!isValidUser(event)) return commonErrorResponse;
 
   const { url, idCard } = JSON.parse(event.body);
 
   // check params
   if (!url) {
-    raiseError("ERR: params not enough: url");
-    return;
+    reportError(new Error("param missing: url"));
+    return commonErrorResponse;
   }
   if (!idCard) {
-    raiseError("ERR: params not enough: url");
-    return;
+    reportError(new Error("param missing: idCard"));
+    return commonErrorResponse;
   }
 
   const params = createParams(url);
-  const response = await attachUrlToCard(params, idCard);
+  await attachUrlToCard(params, idCard);
 
-  // something wrong
-  if (!response.ok) {
-    raiseError(`ERR: trello api says response.ok is false ${urlSource}`);
-    return {
-      statusCode: response.status,
-      body: response.statusText,
-    };
-  }
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ result: true }),
-  };
-};
+  return commonSuccessResponse;
+});

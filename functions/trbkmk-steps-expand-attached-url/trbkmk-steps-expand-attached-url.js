@@ -1,60 +1,45 @@
 const fetch = require("node-fetch");
+const {
+  initSentry,
+  catchErrors,
+  createBaseUrl,
+  createCommonRequestHeaders,
+  commonErrorResponse,
+  isValidUser,
+} = require("../utils");
 
-const raiseError = (message) => {
-  console.error(message);
-};
-
-exports.handler = async (event) => {
-  if (event.httpMethod !== "POST") {
-    raiseError("ERR: method is not post");
-    return {
-      statusCode: 400,
-      body: "Must POST to this function",
-    };
-  }
-  const envUrl = event.headers["x-debug-env-url"] || process.env.URL;
-  let baseUrl = `${envUrl}/.netlify/functions`;
-
-  const URL = {
-    UNSHORTEN_URL: `${baseUrl}/unshorten-url`,
-    ATTACH_URL: `${baseUrl}/trello-attach-url-to-card`,
-  };
+exports.handler = catchErrors(async (event) => {
+  initSentry();
 
   // check secret
-  const appSecret = event.headers["x-appsecret"];
-  if (appSecret !== process.env.APP_SECRET) {
-    raiseError("ERR: appSecret invalid");
-    return {
-      statusCode: 400,
-      body: "appSecret invalid",
-    };
-  }
+  if (!isValidUser(event)) return commonErrorResponse;
 
-  const commonRequestHeaders = {
-    "x-appsecret": event.headers["x-appsecret"],
-    Accept: "application/json",
+  const baseUrl = createBaseUrl(event);
+
+  const api = {
+    unshortenUrl: `${baseUrl}/unshorten-url`,
+    attachUrl: `${baseUrl}/trello-attach-url-to-card`,
   };
 
+  const headers = createCommonRequestHeaders(event);
+
   const unshortenUrl = async (originalUrl) => {
-    // TODO: handle error
-    const url = `${URL.UNSHORTEN_URL}?url=${originalUrl}`;
+    const url = `${api.unshortenUrl}?url=${originalUrl}`;
     console.log(url);
     const response = await fetch(url, {
       method: "get",
-      headers: commonRequestHeaders,
+      headers,
     });
     return await response.json();
   };
 
   const attachUrlToCard = async (idCard, url) => {
-    // TODO: handle error
-    console.log(url);
-    const response = await fetch(URL.ATTACH_URL, {
+    const response = await fetch(api.attachUrl, {
       method: "post",
-      headers: commonRequestHeaders,
+      headers,
       body: JSON.stringify({ idCard, url }),
     });
-    return response.json();
+    return await response.json();
   };
 
   const { idCard, url } = JSON.parse(event.body);
@@ -74,7 +59,11 @@ exports.handler = async (event) => {
   }
 
   // else attach new url
-  const updatedCardData = await attachUrlToCard(idCard, unshortenedUrl);
+  try {
+    await attachUrlToCard(idCard, unshortenedUrl);
+  } catch (e) {
+    return commonErrorResponse;
+  }
 
   return {
     statusCode: 400,
@@ -83,4 +72,4 @@ exports.handler = async (event) => {
       attached: true,
     }),
   };
-};
+});
