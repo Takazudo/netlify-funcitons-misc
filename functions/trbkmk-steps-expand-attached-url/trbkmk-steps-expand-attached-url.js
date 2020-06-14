@@ -1,8 +1,5 @@
 const fetch = require("node-fetch");
 
-// Trello card's desc can contain 16384 chars
-const DESC_LIMIT_TEXT_LENGTH = 16384;
-
 const raiseError = (message) => {
   console.error(message);
 };
