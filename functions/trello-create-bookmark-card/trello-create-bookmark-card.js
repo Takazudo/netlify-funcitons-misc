@@ -1,4 +1,5 @@
 const fetch = require("node-fetch");
+const { initSentry, catchErrors } = require("../utils");
 
 const raiseError = (message) => {
   console.error(message);
@@ -12,7 +13,7 @@ const createParams = ({ url, idList, desc }) => {
   params.append("key", key);
   params.append("token", token);
   params.append("urlSource", url);
-  if(desc) {
+  if (desc) {
     params.append("desc", desc);
   }
   return params;
@@ -37,7 +38,9 @@ const getTargetListId = (targetList) => {
   return idList;
 };
 
-exports.handler = async (event) => {
+exports.handler = catchErrors(async (event) => {
+  initSentry();
+
   // check method
   if (event.httpMethod !== "POST") {
     raiseError("ERR: method is not post");
@@ -84,4 +87,4 @@ exports.handler = async (event) => {
     statusCode: 200,
     body: JSON.stringify({ cardData }),
   };
-};
+});

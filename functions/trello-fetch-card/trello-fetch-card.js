@@ -1,4 +1,5 @@
 const fetch = require("node-fetch");
+const { initSentry, catchErrors } = require("../utils");
 
 const raiseError = (message) => {
   console.error(message);
@@ -10,14 +11,19 @@ const fetchCard = async (cardId) => {
   params.append("key", process.env.TRELLO_API_KEY);
   params.append("token", process.env.TRELLO_API_TOKEN);
   params.append("attachments", "true");
-  const response = await fetch(`https://api.trello.com/1/card/${cardId}?${params}`, {
-    method: "get",
-    headers: { Accept: "application/json" }
-  });
+  const response = await fetch(
+    `https://api.trello.com/1/card/${cardId}?${params}`,
+    {
+      method: "get",
+      headers: { Accept: "application/json" },
+    }
+  );
   return response;
 };
 
-exports.handler = async (event) => {
+exports.handler = catchErrors(async (event) => {
+  initSentry();
+
   // check method
   if (event.httpMethod !== "GET") {
     raiseError("ERR: method is not get");
@@ -62,4 +68,4 @@ exports.handler = async (event) => {
     statusCode: 200,
     body: JSON.stringify(cardData),
   };
-};
+});

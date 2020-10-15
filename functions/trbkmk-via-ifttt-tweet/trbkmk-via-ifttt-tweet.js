@@ -1,4 +1,5 @@
 const fetch = require("node-fetch");
+const { initSentry, catchErrors } = require("../utils");
 
 // expected format is like below
 // "{{secret}}___SEPARATOR___{{Text}}___SEPARATOR___{{LinkURL}}"
@@ -13,7 +14,7 @@ const extractDataFromBody = (requestBody) => {
   };
 };
 
-exports.handler = async (event) => {
+exports.handler = catchErrors(async (event) => {
   if (event.httpMethod !== "POST") {
     return {
       statusCode: 400,
@@ -53,4 +54,4 @@ exports.handler = async (event) => {
     statusCode: 400,
     body: JSON.stringify(result),
   };
-};
+});

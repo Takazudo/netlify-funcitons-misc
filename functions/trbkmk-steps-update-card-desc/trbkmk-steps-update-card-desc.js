@@ -1,4 +1,5 @@
 const fetch = require("node-fetch");
+const { initSentry, catchErrors } = require("../utils");
 
 // Trello card's desc can contain 16384 chars
 const DESC_LIMIT_TEXT_LENGTH = 16384;
@@ -17,7 +18,7 @@ const createNewDesc = (prevDesc, pageText) => {
   return newDesc.slice(0, DESC_LIMIT_TEXT_LENGTH);
 };
 
-exports.handler = async (event) => {
+exports.handler = catchErrors(async (event) => {
   if (event.httpMethod !== "POST") {
     raiseError("ERR: method is not post");
     return {
@@ -99,4 +100,4 @@ exports.handler = async (event) => {
     statusCode: 400,
     body: JSON.stringify(updatedCardData),
   };
-};
+});

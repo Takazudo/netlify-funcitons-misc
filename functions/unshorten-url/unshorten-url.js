@@ -1,4 +1,5 @@
 const tall = require("tall").tall;
+const { initSentry, catchErrors } = require("../utils");
 
 const raiseError = (message) => {
   console.error(message);
@@ -7,16 +8,13 @@ const raiseError = (message) => {
 const unshortenUrl = async (url) => {
   const isYoutube = /youtube/.test(url);
   // I'm not sure but youtube always fails
-  if(isYoutube) return url;
-
-  try {
-    return await tall(url);
-  } catch (error) {
-    throw new Error();
-  }
+  if (isYoutube) return url;
+  return await tall(url);
 };
 
-exports.handler = async (event) => {
+exports.handler = catchErrors(async (event) => {
+  initSentry();
+
   // check method
   if (event.httpMethod !== "GET") {
     raiseError("ERR: method is not get");
@@ -44,22 +42,14 @@ exports.handler = async (event) => {
     };
   }
 
-  try {
-    const result = await unshortenUrl(url);
-    return {
-      statusCode: 200,
-      'Content-Type': 'application/json; charset=UTF-8',
-      body: JSON.stringify({
-        original: url,
-        result
-      })
-    };
-  } catch (err) {
-    raiseError(`ERR: fetching page failed. ${url}`);
-    console.error(err);
-    return {
-      statusCode: 500,
-      body: "failed",
-    };
-  }
-};
+  const result = await unshortenUrl(url);
+
+  return {
+    statusCode: 200,
+    "Content-Type": "application/json; charset=UTF-8",
+    body: JSON.stringify({
+      original: url,
+      result,
+    }),
+  };
+});

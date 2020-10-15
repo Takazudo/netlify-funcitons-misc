@@ -1,4 +1,5 @@
 const fetch = require("node-fetch");
+const { initSentry, catchErrors } = require("../utils");
 
 const raiseError = (message) => {
   console.error(message);
@@ -18,7 +19,9 @@ const sendRequest = async ({ idCard, desc }) => {
   return response;
 };
 
-exports.handler = async (event) => {
+exports.handler = catchErrors(async (event) => {
+  initSentry();
+
   // check method
   if (event.httpMethod !== "PUT") {
     raiseError("ERR: method is not PUT");
@@ -66,4 +69,4 @@ exports.handler = async (event) => {
     statusCode: 200,
     body: JSON.stringify({ cardData }),
   };
-};
+});
