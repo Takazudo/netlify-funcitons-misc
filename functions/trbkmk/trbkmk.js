@@ -72,14 +72,30 @@ exports.handler = catchErrors(async (event) => {
   };
 
   const { url, targetList, desc } = JSON.parse(event.body);
+
+  //console.log('==== url ====');
+  //console.log(url);
+  //console.log('==== targetList ====');
+  //console.log(targetList);
+  //console.log('==== desc ====');
+  //console.log(desc);
+
   const { cardData } = await sendCardCreationRequest(url, targetList, desc);
+
+  //console.log('==== cardData ====');
+  //console.log(cardData);
+
   const idCard = cardData.id;
 
   // notify that we made a card via mail
   sendMail(cardData.name, url);
 
   // invoke extras
-  updateCardDesc(idCard);
+  const updateResponse = await updateCardDesc(idCard);
+
+  //console.log('==== updateResponse ====');
+  //console.log(updateResponse);
+
   expandAttachedUrl(idCard, url);
 
   // we need a tiny delay to invoke above extras

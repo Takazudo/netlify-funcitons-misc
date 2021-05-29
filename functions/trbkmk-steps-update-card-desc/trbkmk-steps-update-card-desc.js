@@ -53,7 +53,7 @@ exports.handler = catchErrors(async (event) => {
   const fetchCard = async (idCard) => {
     // TODO: handle error
     const url = `${URL.FETCH_CARD}?idCard=${idCard}`;
-    console.log(url);
+    //console.log(url);
     const response = await fetch(url, {
       method: "get",
       headers: commonRequestHeaders,
@@ -64,7 +64,7 @@ exports.handler = catchErrors(async (event) => {
   const fetchPageText = async (targetUrl) => {
     // TODO: handle error
     const url = `${URL.FETCH_PAGE_TEXT}?url=${targetUrl}`;
-    console.log(url);
+    //console.log(url);
     const response = await fetch(url, {
       method: "get",
       headers: commonRequestHeaders,
@@ -74,7 +74,7 @@ exports.handler = catchErrors(async (event) => {
 
   const updateCardDesc = async (idCard, desc) => {
     // TODO: handle error
-    console.log(url);
+    //console.log(url);
     const response = await fetch(URL.UPDATE_DESC, {
       method: "put",
       headers: commonRequestHeaders,
@@ -88,7 +88,19 @@ exports.handler = catchErrors(async (event) => {
   const cardData = await fetchCard(idCard);
 
   const desc = cardData.desc;
-  const url = cardData.attachments[0].url;
+  //console.log('==== cardData ====');
+  //console.log(cardData);
+
+  // Note: posted urlSource was handled as attachment before.
+  // but now trello API handles it as card name.
+  //const url = cardData.attachments[0].url;
+  const url = cardData.name;
+
+  //console.log('==== desc ====');
+  //console.log(desc);
+  //console.log('==== url ====');
+  //console.log(url);
+
   // TODO: handle error
   const pageText = await fetchPageText(url);
 
